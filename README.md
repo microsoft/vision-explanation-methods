@@ -1,14 +1,9 @@
-# Project
+# Microsoft Vision Explainability Methods
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repo focuses on the implementation of D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) for the interpretation of fine-tuned object detection models.
+D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by random masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question. In this implementation, we ____.
 
-As the maintainer of this project, please make a few updates:
-
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Installing Dependencies
 
 ## Contributing
 
