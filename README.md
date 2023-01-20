@@ -1,9 +1,24 @@
-# Microsoft Vision Explainability Methods
+# vision-explanation-methods 
 
 This repo focuses on the implementation of D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) for the interpretation of fine-tuned object detection models.
 D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by random masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question. In this implementation, we ____.
 
-## Installing Dependencies
+## Example outputs
+
+## Installation
+
+To install the vision explanation package,
+
+## Colab
+
+The process of fine-tuning an object detection model and visualizing it through D-RISE is here.
+
+## Basic Usage
+
+'''
+python DRISE_runner.py
+'''
+'DRISE_runner' has many optional arguments for loading in user pre-trained models and further specifications. Use the command 
 
 ## Contributing
 
