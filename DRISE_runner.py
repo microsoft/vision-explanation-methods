@@ -106,7 +106,7 @@ def get_instance_segmentation_model(num_classes):
     return model2
 
 
-def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks,maskres,cpuuse):
+def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks,maskres,devicechoice):
     """
     Parse user input and call drise on specified model.
     Save visualizations.
@@ -127,9 +127,10 @@ def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks
     test_image = Image.open(imagelocation)
     
     model.eval()
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if cpuuse: device= 'cpu'
+    if not devicechoice:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    else: device = devicechoice
+    
 
     model = model.to(device)
     explainable_wrapper = PytorchFasterRCNNWrapper(model, numclasses)
@@ -197,10 +198,10 @@ if __name__ == "__main__":
     
     parser.add_argument("--nummasks", default=25 ,help = "number of masks. Default: 25", type=int)
     parser.add_argument("--maskres", default=(4,4) ,help = "mask resolution. Default: (4,4) ", type=tuple)
-    parser.add_argument("--usecpu",default=False,help="force cpu. Default: False", type=bool)
+    parser.add_argument("--device",default=None, help="enforce certain device. Default: cuda:0 if available, cpu if not.", type=str)
 
     args = parser.parse_args()
 
     #generate(4,5)
 
-    res = final_visualization(args.imagelocation, args.modellocation, args.numclasses, args.savename, args.nummasks, args.maskres, args.usecpu)
+    res = final_visualization(args.imagelocation, args.modellocation, args.numclasses, args.savename, args.nummasks, args.maskres, args.device)
