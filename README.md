@@ -12,6 +12,7 @@ To install the vision explanation package,
 ## Colab
 
 The process of fine-tuning an object detection model and visualizing it through D-RISE is here.
+https://colab.research.google.com/drive/1RRJytXf-yBlD_KSOQ0k3TpHItgs56I5q?usp=sharing
 
 ## Basic Usage
 
