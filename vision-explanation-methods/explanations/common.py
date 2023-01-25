@@ -29,9 +29,10 @@ class DetectionRecord:
     :type class_scores: torch.Tensor
     """
 
-    bounding_boxes: torch.Tensor
-    objectness_scores: torch.Tensor
-    class_scores: torch.Tensor
+    def __init__(self, bounding_boxes: torch.Tensor, objectness_scores: torch.Tensor, class_scores: torch.Tensor):
+        self.bounding_boxes = bounding_boxes
+        self.objectness_scores = objectness_scores
+        self.class_scores = class_scores
 
     def to(self, device: str) -> None:
         """Move tensors to compute device.
@@ -64,7 +65,7 @@ class GeneralObjectDetectionModelWrapper(abc.ABC):
     """Prototype for that defines the interface for standard OD model."""
 
     @abc.abstractmethod
-    def get_detections(self, x: torch.Tensor) -> List[DetectionRecord]:
+    def predict(self, x: torch.Tensor) -> List[DetectionRecord]:
         """Take a tensor and return a list of detection records.
 
         This is the only required method.

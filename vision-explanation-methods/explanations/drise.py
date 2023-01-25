@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ---------------------------------------------------------
 
-"""Implementation of DRISE - a black box  explainability method for
+"""Implementation of DRISE - a black box explainability method for
 object detection"""
 
 
@@ -99,9 +99,7 @@ def fuse_mask(
     :return: Masked image
     :rtype: Tensor
     """
-    mask_tensor = img_tensor * mask
-
-    return mask_tensor
+    return img_tensor * mask
 
 
 def compute_affinity_scores(
@@ -109,6 +107,7 @@ def compute_affinity_scores(
     masked_detections: DetectionRecord
 ) -> torch.Tensor:
     """Compute highest affinity score between two sets of detections.
+    
     :param base_detections: Set of detections to get affinity scores for
     :type base_detections: Detection Record
     :param masked_detections: Set of detections to score against
