@@ -1,48 +1,64 @@
 import torch
+import torchvision
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torchvision.models.detection as detection
 from torchvision import transforms as T
 from captum.attr import visualization as viz
+
 import numpy
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+from matplotlib import patches
 import PIL.Image as Image
 
-import torchvision
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 import os
-import numpy as np
-from bs4 import BeautifulSoup
 import argparse
 
-from sys import path
+from typing import Tuple, Optional, List
 
-from .explanations import drise as drise
+from .explanations import drise
 from .explanations import common as od_common
 
 
 
 class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
-    """
+    """Wraps a PytorchFasterRCNN model with a predict API function for object detection.
+
     To be compatible with the drise explainability method, all models must be wrapped to have
     the same output and input class.
     This wrapper is customized for the FasterRCNN model from Pytorch, and can
     also be used with the RetinaNet or any other models with the same output class.
+
+    :param model: Object detection model
+    :type model: PytorchFasterRCNN model
+    :param number_of_classes: Number of classes the model is predicting
+    :type number_of_classes: int
     """
     
-    def __init__(self, model, number_of_classes):
+    def __init__(self, model, number_of_classes: int):
         self._model = model
         self._number_of_classes = number_of_classes
 
-    # This is the only method that needs to be impelmented. It takes a tensor and 
-    # returns a list of detection records.
+    def predict(self, x: torch.Tensor) -> List[od_common.DetectionRecord]:
+        """Creates a list of detection records from the image predictions.
 
-
-    def predict(self, x):
+        :param x: Tensor of the image
+        :type x: torch.Tensor
+        :return: Baseline detections to get saliency maps for
+        :rtype: List of Detection Records
+        """
         raw_detections = self._model(x)
 
-        def apply_nms(orig_prediction, iou_thresh=0.5): 
+        def apply_nms(orig_prediction: dict, iou_thresh: float=0.5):
+            """Performs non maximum suppression on the predictions according to their intersection-over-union.
+
+            :param orig_prediction: Original model prediction 
+            :type orig_prediction: dict
+            :param iou_thresh: iou_threshold for nms
+            :type iou_thresh: float
+            :return: Model prediction after nms is applied
+            :rtype: dict
+            """
             keep = torchvision.ops.nms(orig_prediction['boxes'], orig_prediction['scores'], iou_thresh)
 
             nms_prediction = orig_prediction
@@ -51,8 +67,18 @@ class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
             nms_prediction['labels'] = nms_prediction['labels'][keep]
             return nms_prediction
         
-        def filter_score(orig_prediction, score_thresh=0.2):
-            keep = orig_prediction['scores'] > 0.2
+        def filter_score(orig_prediction: dict, score_thresh: float=0.5):
+            """Filters out model predictions with confidence scores below score_thresh
+
+            :param orig_prediction: Original model prediction 
+            :type orig_prediction: dict
+            :param score_thresh: Score threshold to filter by
+            :type score_thresh: float
+            :return: Model predictions filtered out by score_thresh 
+            :rtype: dict
+            """
+            keep = orig_prediction['scores'] > score_thresh
+
             filter_prediction = orig_prediction
             filter_prediction['boxes'] = filter_prediction['boxes'][keep]
             filter_prediction['scores'] = filter_prediction['scores'][keep]
@@ -67,7 +93,7 @@ class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
             # DRISE requires a score for each class. We approximate the score for each class
             # by dividing the (1.0 - class score) evenly among the other classes.
             
-            raw_detection = filter_score(raw_detection, 0.2) # filter by class scores
+            raw_detection = filter_score(raw_detection, 0.2)
             expanded_class_scores = od_common.expand_class_scores(raw_detection['scores'],
                                                                   raw_detection['labels'],
                                                                   self._number_of_classes)
@@ -83,9 +109,19 @@ class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
         return detections
 
 
-def plot_img_bbox(ax, box, label, color):
-    """
-    helper function to plot final visualizations
+def plot_img_bbox(ax, box: numpy.ndarray, label: str, color: str):
+    """Plots predicted bounding box and label on top of the d-rise generated saliency map.
+
+    :param ax: Axis on which the d-rise saliency map was plotted 
+    :type ax: Matplotlib AxesSubplot
+    :param box: Bounding box the model predicted
+    :type box: numpy.ndarray
+    :param label: Label the model predicted 
+    :type label: str
+    :param color: Color of the bounding box based on predicted label
+    :type color: single letter color string
+    :return: Axis with the predicted bounding box and label plotted on top of d-rise saliency map
+    :rtype: 
     """
     x, y, width, height = box[0], box[1], box[2]-box[0], box[3]-box[1]
     rect = patches.Rectangle((x, y),
@@ -98,28 +134,53 @@ def plot_img_bbox(ax, box, label, color):
     frame = ax.get_position()
     ax.set_position([frame.x0, frame.y0, frame.width * 0.8, frame.height])
 
-    # Put a legend to the right of the current axis
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     return ax
 
 
-def get_instance_segmentation_model(num_classes):
+def get_instance_segmentation_model(num_classes: int):
+    """Load in pre-trained Faster R-CNN model with resnet50 backbone.
+
+    :param num_classes: Number of classes model predicted
+    :type num_classes: int
+    :return: Faster R-CNN PyTorch model 
+    :rtype: PyTorch model
     """
-    To load in recycling pre-trained model -
-    load an instance segmentation model pre-trained on COCO
-    """
-    model2= torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-    in_features = model2.roi_heads.box_predictor.cls_score.in_features
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
-    model2.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     
-    return model2
+    return model
 
 
-def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks=25,maskres=(4,4),devicechoice=None):
-    """
-    Parse user input and call drise on specified model.
-    Save visualizations.
+def get_drise_saliency_map(
+    imagelocation: str,
+    modellocation: Optional[str],
+    numclasses: int,
+    savename: str,
+    nummasks: int=25,
+    maskres: Tuple[int, int]=(4,4),
+    devicechoice: Optional[str]=None
+    ):
+    """Run D-RISE on image and visualize the saliency maps
+
+    :param imagelocation: Path for the image location.
+    :type imagelocation: str
+    :param modellocation: Path for the model location. If None, pre-trained Faster R-CNN model will be used.
+    :type modellocation: Optional str
+    :param numclasses: Number of classes model predicted
+    :type numclasses: int
+    :param savename: Path for the saved output figure. 
+    :type savename: str
+    :param nummasks: Number of masks to use for saliency
+    :type nummasks: int
+    :param maskres: Resolution of mask before scale up
+    :type maskres: Tuple of ints
+    :param devicechoice: Device to use to run the function
+    :type devicechoice: str
+    :return: Tuple of Matplotlib figure and string path to where the output figure is saved 
+    :rtype: Tuple of Matplotlib figure, str
     """
     
     if not devicechoice:
@@ -131,14 +192,14 @@ def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks
         print("using pretrained model")
         model = detection.fasterrcnn_resnet50_fpn(pretrained=True,map_location=device)
         numclasses = 91
-        
+
     else:
         print("loading user model")
         model = get_instance_segmentation_model(numclasses)
         model.load_state_dict(torch.load(modellocation,map_location=device))
-        
+
     test_image = Image.open(imagelocation).convert('RGB')
-    
+
     model = model.to(device)
     model.eval()
 
@@ -168,10 +229,6 @@ def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks
 
     fig, axis = plt.subplots(1, num_detections,figsize= (num_detections*10,10))
 
-    # color and label mappings 
-    cmap = plt.cm.get_cmap('tab20c', len(detections[0].class_scores[0]))
-    
-
     for i in range(num_detections):
         viz.visualize_image_attr(
             numpy.transpose(saliency_scores[i]['detection'].cpu().detach().numpy(), (1, 2, 0)), #drise runner usually has access to an images folder
@@ -185,7 +242,7 @@ def final_visualization(imagelocation,modellocation,numclasses,savename,nummasks
             plt_fig_axis = (fig, axis[i]),
             use_pyplot = False
         )
-        
+
         box = detections[img_index].bounding_boxes[i].detach().numpy() 
         label = int(torch.argmax(detections[img_index].class_scores[i]))  
         if num_detections>1: #if there is more than one element to display, hence multiple subplots
@@ -215,6 +272,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    #generate(4,5)
-
-    res = final_visualization(args.imagelocation, args.modellocation, args.numclasses, args.savename, args.nummasks, args.maskres, args.device)
+    res = get_drise_saliency_map(args.imagelocation, args.modellocation, args.numclasses, args.savename, args.nummasks, args.maskres, args.device)

@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 import vision_explanation_methods.DRISE_runner as dr
 import urllib.request as request_file
 
-
 #execute tests from the root folder as follows: pytest path/to/test_filename.py
-
 
 def download_assets(filepath,force=False):
     if force or not os.path.exists(filepath):
@@ -28,7 +26,7 @@ def test_vision_explain_preloaded():
     savepath = os.path.join('python','vision_explanation_methods/res','testoutput_preloaded.jpg')
     #save tested result in res
 
-    res = dr.final_visualization(imgpath, None, None, savepath) #run the main function for saliency map generation
+    res = dr.get_drise_saliency_map(imgpath, None, None, savepath) #run the main function for saliency map generation
 
     #assert that result is a tuple of figure and its location.
     assert(len(res)==2)
@@ -54,7 +52,7 @@ def test_vision_explain_loadmodel():
 
     _ = download_assets(modelpath) #use helper function from above to fetch model
 
-    res = dr.final_visualization(imgpath, modelpath, 5, savepath) #run the main function for saliency map generation
+    res = dr.get_drise_saliency_map(imgpath, modelpath, 5, savepath) #run the main function for saliency map generation
 
     #assert that result is a tuple of figure and its location.
     assert(len(res)==2)
