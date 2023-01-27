@@ -3,8 +3,22 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import vision_explanation_methods.DRISE_runner as dr
+import urllib.request as request_file
+
 
 #execute tests from the root folder as follows: pytest path/to/test_filename.py
+
+
+def download_assets(filepath,force=False):
+    if force or not os.path.exists(filepath):
+        request_file.urlretrieve(
+                        "https://publictestdatasets.blob.core.windows.net/models/fastrcnn.pt",
+                        os.path.join(filepath))
+    else:
+        print('Found' + filepath)
+
+    return filepath
+
 
 def test_vision_explain_preloaded():
     """
@@ -37,6 +51,8 @@ def test_vision_explain_loadmodel():
     modelpath = os.path.join('python','vision_explanation_methods','models','fastrcnn.pt') #load fastrcnn model. 
     savepath = os.path.join('python','vision_explanation_methods','res','testoutput_loadedmodel.jpg')
     #save tested result in res
+
+    _ = download_assets(modelpath) #use helper function from above to fetch model
 
     res = dr.final_visualization(imgpath, modelpath, 5, savepath) #run the main function for saliency map generation
 
