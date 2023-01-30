@@ -223,7 +223,7 @@ def DRISE_saliency(
         mask = generate_mask(mask_res, img_size, mask_padding)
         masked_image = fuse_mask(image_tensor.to(device), mask.to(device))
         with torch.no_grad():
-            masked_detections = model.get_detections(masked_image)
+            masked_detections = model.predict(masked_image)
 
         affinity_scores = []
 

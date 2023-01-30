@@ -4,7 +4,7 @@
 
 """Module for creating explanations for vision models.
 """
-from .version import name, version
+from .vision_explanation_methods.version import name, version
 
 __name__ = name
 __version__ = version
