@@ -151,6 +151,7 @@ def get_instance_segmentation_model(num_classes: int):
 
 def get_drise_saliency_map(
     imagelocation: str,
+    model: Optional[object],
     modellocation: Optional[str],
     numclasses: int,
     savename: str,
@@ -158,7 +159,7 @@ def get_drise_saliency_map(
     maskres: Tuple[int, int]=(4,4),
     maskpadding: Optional[int]=None,
     devicechoice: Optional[str]=None,
-    wrapperchoice: Optional[None] = PytorchFasterRCNNWrapper
+    wrapperchoice: Optional[object] = PytorchFasterRCNNWrapper
     ):
     """Run D-RISE on image and visualize the saliency maps
 
@@ -188,16 +189,22 @@ def get_drise_saliency_map(
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else: device = devicechoice
 
-    if not modellocation:
-        # If user did not specify a model location, we simply load in the pytorch pre-trained model.
-        print("using pretrained model")
-        model = detection.fasterrcnn_resnet50_fpn(pretrained=True,map_location=device)
-        numclasses = 91
+    if not model:
+        if not modellocation:
+            # If user did not specify a model location, we simply load in the pytorch pre-trained model.
+            print("using pretrained fastercnn model")
+            model = detection.fasterrcnn_resnet50_fpn(pretrained=True,map_location=device)
+            numclasses = 91
 
+        else:
+            print("loading user fastercnn model")
+            model = get_instance_segmentation_model(numclasses)
+            model.load_state_dict(torch.load(modellocation,map_location=device))
     else:
-        print("loading user model")
-        model = get_instance_segmentation_model(numclasses)
-        model.load_state_dict(torch.load(modellocation,map_location=device))
+        if modellocation:
+            print("loading any user model")
+            model.load_state_dict(torch.load(modellocation,map_location=device))
+
 
     test_image = Image.open(imagelocation).convert('RGB')
 
