@@ -2,8 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ---------------------------------------------------------
 
-"""Common functions and classes used between different object detection
-explainability methods."""
+"""Common functions and classes.
+
+Used between different object detection explainability methods.
+"""
 
 import abc
 from dataclasses import dataclass
@@ -17,19 +19,25 @@ class DetectionRecord:
     """Data class to provide a common format for detections.
 
     :param bounding_boxes: Set of bounding boxes for image,
-    shape [D, 4], where D is the number of detections. Assumed
-    to be of format [Left, Top, Right, Bottom]
+        shape [D, 4], where D is the number of detections. Assumed
+        to be of format [Left, Top, Right, Bottom]
     :type bounding_boxes: torch.Tensor
     :param objectness_scores: Score of how likely detection is to be an
-    object. Some models, don't specify object score - can be set to 1.0
-    in this case. Shape [D]
+        object. Some models, don't specify object score - can be set to 1.0
+        in this case. Shape [D]
     :type objectness_scores: torch.Tensor
     :param class_scores: Scores associated with the probability detections
-    belong to each class. Shape [D, C], where C is the number of classes
+        belong to each class. Shape [D, C], where C is the number of classes
     :type class_scores: torch.Tensor
     """
 
-    def __init__(self, bounding_boxes: torch.Tensor, objectness_scores: torch.Tensor, class_scores: torch.Tensor):
+    def __init__(
+            self,
+            bounding_boxes: torch.Tensor,
+            objectness_scores: torch.Tensor,
+            class_scores: torch.Tensor
+    ):
+        """Initialize the DetectionRecord."""
         self.bounding_boxes = bounding_boxes
         self.objectness_scores = objectness_scores
         self.class_scores = class_scores
@@ -48,10 +56,10 @@ class DetectionRecord:
         """Select a subset of detections from set of indices of those boxes.
 
         :param indicies: Indices of the subset of boxes to return
-        for example, if you need boxes 0, 2, and 3, pass [0, 2, 3]
+            for example, if you need boxes 0, 2, and 3, pass [0, 2, 3]
         :type indices: List of ints
         :return: A new detection record with only the detections at
-        specified indices.
+            specified indices.
         :rtype: DetectionRecord
         """
         return DetectionRecord(
@@ -85,13 +93,13 @@ def compute_intersections(
     """Compute intersection between two lists of boxes.
 
     :param boxes_a: Tensor of M boxes in coordinates
-    [left, top, right, bottom], shape [N, 4]
+        [left, top, right, bottom], shape [N, 4]
     :type boxes_a: Tensor
     :param boxes_b: Tensor of N boxes in coordinates
-    [left, top, right, bottom], shape [M, 4]
+        [left, top, right, bottom], shape [M, 4]
     :type boxes_b: Tensor
     :return: Intersection matrix. Shape [N, M]. Entry (n, m) is the
-    intersection between boxes_a[n] and boxes_b[m]
+        intersection between boxes_a[n] and boxes_b[m]
     :rtype: Tensor
     """
     number_of_boxes_a = boxes_a.shape[0]
@@ -120,7 +128,7 @@ def compute_areas(boxes: torch.Tensor) -> torch.Tensor:
     """Compute the areas of a list of boxes.
 
     :param boxes:  Tensor of N boxes in coordinates [left, top, right, bottom],
-    shape [N, 4]
+        shape [N, 4]
     :type boxes: Tensor
     :return: Tensor of box areas, shape [N]
     :rtype: Tensor
@@ -135,13 +143,13 @@ def compute_unions(
     """Compute area of unions between two lists of boxes.
 
     :param boxes_a: Tensor of M boxes in coordinates
-    [left, top, right, bottom], shape [N, 4]
+        [left, top, right, bottom], shape [N, 4]
     :type boxes_a: Tensor
     :param boxes_b: Tensor of N boxes in coordinates
-    [left, top, right, bottom], shape [M, 4]
+        [left, top, right, bottom], shape [M, 4]
     :type boxes_b: Tensor
     :return: Intersection matrix. Shape [N, M]. Entry (n, m) is the
-    intersection between boxes_a[m] and boxes_b[n]
+        intersection between boxes_a[m] and boxes_b[n]
     :rtype: Tensor
     """
     number_of_boxes_a = boxes_a.shape[0]
@@ -156,13 +164,13 @@ def compute_IoUs(boxes_a: torch.Tensor, boxes_b: torch.Tensor) -> torch.Tensor:
     """Compute the Intersection over Union of two lists of boxes.
 
     :param boxes_a: Tensor of M boxes in coordinates
-    [left, top, right, bottom], shape [N, 4]
+        [left, top, right, bottom], shape [N, 4]
     :type boxes_a: Tensor
     :param boxes_b: Tensor of N boxes in coordinates
-    [left, top, right, bottom], shape [M, 4]
+        [left, top, right, bottom], shape [M, 4]
     :type boxes_b: Tensor
     :return: Intersection over union matrix. Shape [N, M]. Entry (n, m) is the
-    IoU between boxes_a[m] and boxes_b[n]
+        IoU between boxes_a[m] and boxes_b[n]
     :rtype: Tensor
     """
     return (compute_intersections(boxes_a, boxes_b) /
@@ -226,15 +234,15 @@ def expand_class_scores(
     between 1.0 and the predicted class score among the remaning classes.
 
     :param scores: Set of class specific scores. Shape [D] where D is number
-    of detections
+        of detections
     :type scores: torch.Tensor
     :param labels: Set of label indices corresponding to predicted class.
-    Shape [D] where D is number of detections
+        Shape [D] where D is number of detections
     :type labels: torch.Tensor (ints)
     :param number_of_classes: Number of classes model predicts
     :type number_of_classes: int
     :return: A set of expanded scores, of shape [D, C], where C is number of
-    classes
+        classes
     :type: torch.Tensor
     """
     number_of_detections = scores.shape[0]
