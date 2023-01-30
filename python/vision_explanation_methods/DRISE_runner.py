@@ -10,12 +10,13 @@ import torchvision
 import torchvision.models.detection as detection
 from captum.attr import visualization as viz
 from matplotlib import patches
+import matplotlib
+
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 from .explanations import common as od_common
 from .explanations import drise
-
 
 class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
     """Wraps a PytorchFasterRCNN model with a predict API function for object detection.
