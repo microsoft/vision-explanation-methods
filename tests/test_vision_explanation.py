@@ -1,9 +1,10 @@
-import pytest
-import sys
 import os
-import matplotlib.pyplot as plt
-import vision_explanation_methods.DRISE_runner as dr
+import sys
 import urllib.request as request_file
+
+import matplotlib.pyplot as plt
+import pytest
+import vision_explanation_methods.DRISE_runner as dr
 
 #execute tests from the root folder as follows: pytest path/to/test_filename.py
 

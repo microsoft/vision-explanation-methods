@@ -8,16 +8,15 @@ object detection"""
 
 import copy
 from dataclasses import dataclass
-from typing import Tuple, Optional, List
-
+from typing import List, Optional, Tuple
 
 import PIL.Image as Image
 import torch
-import tqdm
 import torchvision.transforms as T
+import tqdm
 
-from .common import DetectionRecord, \
-    GeneralObjectDetectionModelWrapper, compute_affinity_matrix
+from .common import (DetectionRecord, GeneralObjectDetectionModelWrapper,
+                     compute_affinity_matrix)
 
 
 @dataclass
