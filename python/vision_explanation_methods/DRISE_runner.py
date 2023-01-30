@@ -2,6 +2,7 @@ import argparse
 import os
 from typing import List, Optional, Tuple
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import PIL.Image as Image
@@ -9,8 +10,6 @@ import torch
 import torchvision
 import torchvision.models.detection as detection
 from captum.attr import visualization as viz
-from matplotlib import patches
-import matplotlib
 
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -120,7 +119,7 @@ def plot_img_bbox(ax : matplotlib.axes._subplots, box: numpy.ndarray, label: str
     :rtype: Matplotlib AxesSubplot
     """
     x, y, width, height = box[0], box[1], box[2]-box[0], box[3]-box[1]
-    rect = patches.Rectangle((x, y),
+    rect = matplotlib.patches.Rectangle((x, y),
                             width, height,
                             linewidth = 2,
                             edgecolor = color,
