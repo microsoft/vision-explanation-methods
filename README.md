@@ -24,6 +24,7 @@ To generate saliency maps, import the package and run:
 ```
 res = DRISE_runner.get_drise_saliency_map(
     imagelocation: str,
+    model: Optional[object]
     modellocation: Optional[str],
     numclasses: int,
     savename: str,
@@ -31,7 +32,7 @@ res = DRISE_runner.get_drise_saliency_map(
     maskres: Tuple[int, int]=(4,4),
     maskpadding: Optional[int]=None,
     devicechoice: Optional[str]=None,
-    wrapperchoice: Optional[None] = PytorchFasterRCNNWrapper
+    wrapperchoice: Optional[object] = PytorchFasterRCNNWrapper
     )
 ```
 

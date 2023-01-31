@@ -57,7 +57,7 @@ def test_vision_explain_loadmodel():
     modelpath = os.path.join('python/vision_explanation_methods/models',
                              'fastrcnn.pt')  # load fastrcnn model
     savepath = os.path.join('python/vision_explanation_methods/res',
-                            'testoutput_preloaded.jpg')
+                            'testoutput_loadedmodel.jpg')
     # save tested result in res
 
     # use helper function from above to fetch model
