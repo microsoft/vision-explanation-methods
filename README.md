@@ -24,7 +24,7 @@ To generate saliency maps, import the package and run:
 ```
 res = DRISE_runner.get_drise_saliency_map(
     imagelocation: str,
-    model: Optional[object]
+    model: Optional[object],
     modellocation: Optional[str],
     numclasses: int,
     savename: str,
