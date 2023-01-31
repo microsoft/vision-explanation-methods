@@ -1,14 +1,39 @@
-# Project
+# vision-explanation-methods 
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+Vision Explanation Methods is an open-source package that implements D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) towards visual interpretations of object detection models.
+D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by randomly masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question.  
 
-As the maintainer of this project, please make a few updates:
+## Example outputs
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+![example output](python/vision_explanation_methods/images/outputmaps.jpg)
+
+## Installation
+
+To install the vision explanation package, run:
+```
+pip install vision-explanation-package
+```
+
+## Colab
+
+The process of fine-tuning an object detection model and visualizing it through D-RISE is illustrated in this [colab notebook](https://colab.research.google.com/drive/1RRJytXf-yBlD_KSOQ0k3TpHItgs56I5q?usp=sharing).
+
+## Basic Usage
+
+To generate saliency maps, import the package and run:
+```
+res = DRISE_runner.get_drise_saliency_map(
+    imagelocation: str,
+    modellocation: Optional[str],
+    numclasses: int,
+    savename: str,
+    nummasks: int=25,
+    maskres: Tuple[int, int]=(4,4),
+    maskpadding: Optional[int]=None,
+    devicechoice: Optional[str]=None,
+    wrapperchoice: Optional[None] = PytorchFasterRCNNWrapper
+    )
+```
 
 ## Contributing
 

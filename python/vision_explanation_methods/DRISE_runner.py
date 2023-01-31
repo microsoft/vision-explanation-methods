@@ -2,6 +2,7 @@ import argparse
 import os
 from typing import List, Optional, Tuple
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import PIL.Image as Image
@@ -9,7 +10,6 @@ import torch
 import torchvision
 import torchvision.models.detection as detection
 from captum.attr import visualization as viz
-from matplotlib import patches
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
@@ -104,12 +104,11 @@ class PytorchFasterRCNNWrapper(od_common.GeneralObjectDetectionModelWrapper):
         
         return detections
 
-
-def plot_img_bbox(ax, box: numpy.ndarray, label: str, color: str):
+def plot_img_bbox(ax : matplotlib.axes._subplots, box: numpy.ndarray, label: str, color: str):
     """Plots predicted bounding box and label on top of the d-rise generated saliency map.
 
     :param ax: Axis on which the d-rise saliency map was plotted 
-    :type ax: Matplotlib AxesSubplot
+    :type ax: Matplotlib Axes Subplot
     :param box: Bounding box the model predicted
     :type box: numpy.ndarray
     :param label: Label the model predicted 
@@ -117,10 +116,10 @@ def plot_img_bbox(ax, box: numpy.ndarray, label: str, color: str):
     :param color: Color of the bounding box based on predicted label
     :type color: single letter color string
     :return: Axis with the predicted bounding box and label plotted on top of d-rise saliency map
-    :rtype: 
+    :rtype: Matplotlib AxesSubplot
     """
     x, y, width, height = box[0], box[1], box[2]-box[0], box[3]-box[1]
-    rect = patches.Rectangle((x, y),
+    rect = matplotlib.patches.Rectangle((x, y),
                             width, height,
                             linewidth = 2,
                             edgecolor = color,
@@ -152,18 +151,23 @@ def get_instance_segmentation_model(num_classes: int):
 
 def get_drise_saliency_map(
     imagelocation: str,
+    model: Optional[object],
     modellocation: Optional[str],
     numclasses: int,
     savename: str,
     nummasks: int=25,
     maskres: Tuple[int, int]=(4,4),
-    devicechoice: Optional[str]=None
+    maskpadding: Optional[int]=None,
+    devicechoice: Optional[str]=None,
+    wrapperchoice: Optional[object] = PytorchFasterRCNNWrapper
     ):
     """Run D-RISE on image and visualize the saliency maps
 
     :param imagelocation: Path for the image location.
     :type imagelocation: str
-    :param modellocation: Path for the model location. If None, pre-trained Faster R-CNN model will be used.
+    :param model: Input model for D-RISE. If None, Faster R-CNN model will be used.
+    :type model: PyTorch model 
+    :param modellocation: Path for the model weights. If None, pre-trained Faster R-CNN model will be used.
     :type modellocation: Optional str
     :param numclasses: Number of classes model predicted
     :type numclasses: int
@@ -173,8 +177,12 @@ def get_drise_saliency_map(
     :type nummasks: int
     :param maskres: Resolution of mask before scale up
     :type maskres: Tuple of ints
+    :param maskpadding: How much to pad the mask before cropping
+    :type: Optional int
     :param devicechoice: Device to use to run the function
     :type devicechoice: str
+    :param wrapperchoice: Choice to use fastrcnn wrapper or custom wrapper
+    :type wrapperchoice: class
     :return: Tuple of Matplotlib figure and string path to where the output figure is saved 
     :rtype: Tuple of Matplotlib figure, str
     """
@@ -183,24 +191,32 @@ def get_drise_saliency_map(
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else: device = devicechoice
 
-    if not modellocation:
-        # If user did not specify a model location, we simply load in the pytorch pre-trained model.
-        print("using pretrained model")
-        model = detection.fasterrcnn_resnet50_fpn(pretrained=True,map_location=device)
-        numclasses = 91
+    if not model:
+        if not modellocation:
+            # If user did not specify a model location, we simply load in the pytorch pre-trained model.
+            print("using pretrained fastercnn model")
+            model = detection.fasterrcnn_resnet50_fpn(pretrained=True,map_location=device)
+            numclasses = 91
 
+        else:
+            print("loading user fastercnn model")
+            model = get_instance_segmentation_model(numclasses)
+            model.load_state_dict(torch.load(modellocation,map_location=device))
     else:
-        print("loading user model")
-        model = get_instance_segmentation_model(numclasses)
-        model.load_state_dict(torch.load(modellocation,map_location=device))
+        if modellocation:
+            print("loading any user model")
+            model.load_state_dict(torch.load(modellocation,map_location=device))
+
 
     test_image = Image.open(imagelocation).convert('RGB')
 
     model = model.to(device)
     model.eval()
 
-    print(PytorchFasterRCNNWrapper)
-    explainable_wrapper = PytorchFasterRCNNWrapper(model, numclasses)
+    if not wrapperchoice: 
+        wrapperchoice = PytorchFasterRCNNWrapper
+    explainable_wrapper = wrapperchoice(model, numclasses)
+    
 
     detections = explainable_wrapper.predict(T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
     saliency_scores = drise.DRISE_saliency(
@@ -208,6 +224,7 @@ def get_drise_saliency_map(
         image_tensor=T.ToTensor()(test_image).repeat(2, 1, 1, 1).to(device), # Repeated the tensor to test batching.
         target_detections=detections,
         number_of_masks=nummasks, # This is how many masks to run - more is slower but gives higher quality mask.
+        mask_padding=maskpadding,
         device=device,
         mask_res=maskres, # This is the resolution of the random masks. High resolutions will give finer masks, but more need to be run.
         verbose=True # Turns progress bar on/off.
@@ -250,22 +267,3 @@ def get_drise_saliency_map(
             axis[i] = plot_img_bbox(axis[i],box,str(label),'r')
         fig.savefig(savename)
     return fig,savename
-
-
-
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--imagelocation", default='images/cartons.jpg',\
-        help = "image subdirectory. Default: images/cartons.jpg", type=str)
-    parser.add_argument("--modellocation", default=None ,help = "fine-tuned model subdirectory. Default: pre-trained FastRCNN from Pytorch")
-    parser.add_argument("--numclasses", default=91 ,help = "number of classes. Default: 91",type=int) #interestingly, not enforcing int made it a float ;v;
-    parser.add_argument("--savename", default='res/outputmaps.jpg' ,help = "exported Filename. Default: res/outputmaps.jpg", type=str)
-    
-    parser.add_argument("--nummasks", default=25 ,help = "number of masks. Default: 25", type=int)
-    parser.add_argument("--maskres", default=(4,4) ,help = "mask resolution. Default: (4,4) ", type=tuple)
-    parser.add_argument("--device",default=None, help="enforce certain device. Default: cuda:0 if available, cpu if not.", type=str)
-
-    args = parser.parse_args()
-
-    res = get_drise_saliency_map(args.imagelocation, args.modellocation, args.numclasses, args.savename, args.nummasks, args.maskres, args.device)
