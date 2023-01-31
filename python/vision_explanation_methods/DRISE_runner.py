@@ -6,11 +6,11 @@ from typing import List, Optional, Tuple
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
-from PIL import Image
 import torch
 import torchvision
 import torchvision.models.detection as detection
 from captum.attr import visualization as viz
+from PIL import Image
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
