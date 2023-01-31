@@ -1,7 +1,7 @@
 # vision-explanation-methods 
 
-Vision Explanation Methods is an open-source pacakge that implements D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) towards visual interpretations of object detection models.
-D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by random masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question. In this implementation, we introduce a custom wrapper class for PyTorch FastRCNN models, and provide the option for the user to define their own wrapper class. 
+Vision Explanation Methods is an open-source package that implements D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) towards visual interpretations of object detection models.
+D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by randomly masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question.  
 
 ## Example outputs
 

@@ -108,7 +108,7 @@ def plot_img_bbox(ax : matplotlib.axes._subplots, box: numpy.ndarray, label: str
     """Plots predicted bounding box and label on top of the d-rise generated saliency map.
 
     :param ax: Axis on which the d-rise saliency map was plotted 
-    :type ax: Matplotlib AxesSubplot
+    :type ax: Matplotlib Axes Subplot
     :param box: Bounding box the model predicted
     :type box: numpy.ndarray
     :param label: Label the model predicted 
@@ -165,7 +165,9 @@ def get_drise_saliency_map(
 
     :param imagelocation: Path for the image location.
     :type imagelocation: str
-    :param modellocation: Path for the model location. If None, pre-trained Faster R-CNN model will be used.
+    :param model: Input model for D-RISE. If None, Faster R-CNN model will be used.
+    :type model: PyTorch model 
+    :param modellocation: Path for the model weights. If None, pre-trained Faster R-CNN model will be used.
     :type modellocation: Optional str
     :param numclasses: Number of classes model predicted
     :type numclasses: int
@@ -211,7 +213,8 @@ def get_drise_saliency_map(
     model = model.to(device)
     model.eval()
 
-    if not wrapperchoice: wrapperchoice = PytorchFasterRCNNWrapper
+    if not wrapperchoice: 
+        wrapperchoice = PytorchFasterRCNNWrapper
     explainable_wrapper = wrapperchoice(model, numclasses)
     
 
