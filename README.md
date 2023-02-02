@@ -3,9 +3,13 @@
 Vision Explanation Methods is an open-source package that implements D-RISE ([Detector Randomized Input Sampling for Explanation](https://arxiv.org/abs/2006.03204)) towards visual interpretations of object detection models.
 D-RISE is a black-boxed, or model-agnostic, explainability method which can produce saliency maps for any object detection or instance segmentation models provided these models are appropriately wrapped. In essence, D-RISE works by randomly masking the input images and isolating the parts that are most pertinent for the detection or segmentation of the object in question.  
 
+![drise diagram](python/vision_explanation_methods/images/drisediagram.png)
+(Diagram from Petsiuk et al. 2020)
+
+
 ## Example outputs
 
-![example output](python/vision_explanation_methods/images/outputmaps.jpg)
+![example output](python/vision_explanation_methods/images/outputmaps2.png)
 
 ## Installation
 
@@ -24,6 +28,7 @@ To generate saliency maps, import the package and run:
 ```
 res = DRISE_runner.get_drise_saliency_map(
     imagelocation: str,
+    model: Optional[object],
     modellocation: Optional[str],
     numclasses: int,
     savename: str,
@@ -31,7 +36,7 @@ res = DRISE_runner.get_drise_saliency_map(
     maskres: Tuple[int, int]=(4,4),
     maskpadding: Optional[int]=None,
     devicechoice: Optional[str]=None,
-    wrapperchoice: Optional[None] = PytorchFasterRCNNWrapper
+    wrapperchoice: Optional[object] = PytorchFasterRCNNWrapper
     )
 ```
 
