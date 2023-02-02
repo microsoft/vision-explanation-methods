@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ---------------------------------------------------------
 
-"""Test functions for the vision-explanations-methods package."""
+"""Test functions for the vision-explanation-methods package."""
 
 import os
 import urllib.request as request_file

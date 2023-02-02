@@ -90,7 +90,7 @@ class PytorchFasterRCNNWrapper(
         for raw_detection in raw_detections:
             raw_detection = apply_nms(raw_detection, 0.005)
 
-            # Note that FasterRCNN doesn't return a socre for each class, only
+            # Note that FasterRCNN doesn't return a score for each class, only
             # the predicted class. DRISE requires a score for each class.
             # We approximate the score for each class
             # by dividing (class score) evenly among the other classes.
