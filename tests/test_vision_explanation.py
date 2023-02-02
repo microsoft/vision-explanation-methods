@@ -27,19 +27,20 @@ def download_assets(filepath, force=False):
     return filepath
 
 
+
 def test_vision_explain_preloaded():
     """End to end testing for saliency map generation function."""
-    imgpath = os.path.join('python/vision_explanation_methods/images',
+    imgpath = os.path.join('python','vision_explanation_methods','images',
                            'cartons.jpg')  # unseen test image
-    savepath = os.path.join('python/vision_explanation_methods/res',
+    savepath = os.path.join('python','vision_explanation_methods','res',
                             'testoutput_preloaded.jpg')
     # save tested result in res
 
     # run the main function for saliency map generation
     res = dr.get_drise_saliency_map(imgpath, None, None, None, savepath)
 
-    # assert that result is a tuple of figure and its location.
-    assert(len(res) == 2)
+    # assert that result is a tuple of figure, location, and labels.
+    assert(len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
@@ -48,16 +49,48 @@ def test_vision_explain_preloaded():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
-    print("Test1 passed")
+    #assert that labels returned are in a list.
+    assert(type(res[2]) == type(["cup"]))
+
+    print("Test1 passed for multiple detections")
+
+    imgpath2 = os.path.join('python','vision_explanation_methods','images',
+                           'justmilk.jpg')  # just one carton
+    savepath2 = os.path.join('python','vision_explanation_methods','res',
+                            'testoutput_preloaded2.jpg') 
+
+    # run the main function for saliency map generation
+    # in the case of just a single item in photo
+    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+
+    # assert that result is a tuple of figure, location, and labels.
+    assert(len(res2) == 3)
+
+    # assert that first element in result is a figure.
+    fig, axis = plt.subplots(2, 2)
+    assert(type(res2[0]) == type(fig))
+
+    # assert that figure has been saved in proper location.
+    assert(os.path.exists(res2[1]))
+
+    #assert that labels returned are in a list.
+    assert(type(res2[2]) == type(["cup"]))
+
+    print("Test1 passed for single detection")
+
+    #delete files created during testing
+    for elt in [savepath, savepath2]: 
+        os.remove(elt)
+
 
 
 def test_vision_explain_loadmodel():
     """End to end testing for saliency map generation function."""
-    imgpath = os.path.join('python/vision_explanation_methods/images',
+    imgpath = os.path.join('python','vision_explanation_methods','images',
                            'cartons.jpg')  # unseen test image
-    modelpath = os.path.join('python/vision_explanation_methods/models',
+    modelpath = os.path.join('python','vision_explanation_methods','models',
                              'fastrcnn.pt')  # load fastrcnn model
-    savepath = os.path.join('python/vision_explanation_methods/res',
+    savepath = os.path.join('python','vision_explanation_methods','res',
                             'testoutput_loadedmodel.jpg')
     # save tested result in res
 
@@ -67,8 +100,8 @@ def test_vision_explain_loadmodel():
     # run the main function for saliency map generation
     res = dr.get_drise_saliency_map(imgpath, None, modelpath, 5, savepath)
 
-    # assert that result is a tuple of figure and its location.
-    assert(len(res) == 2)
+    # assert that result is a tuple of figure, location, and labels.
+    assert(len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
@@ -77,4 +110,37 @@ def test_vision_explain_loadmodel():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
-    print("Test2 passed")
+
+    #assert that labels returned are in a list.
+    assert(type(res[2]) == type(["cup"]))
+
+    print("Test2 passed for multiple detections")
+
+    imgpath2 = os.path.join('python','vision_explanation_methods','images',
+                           'justmilk.jpg')  # just one carton
+    savepath2 = os.path.join('python','vision_explanation_methods','res',
+                            'testoutput_loadedmodel2.jpg') 
+
+    # run the main function for saliency map generation
+    # in the case of just a single item in photo
+    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+
+    # assert that result is a tuple of figure, location, and labels.
+    assert(len(res2) == 3)
+
+    # assert that first element in result is a figure.
+    fig, axis = plt.subplots(2, 2)
+    assert(type(res2[0]) == type(fig))
+
+    # assert that figure has been saved in proper location.
+    assert(os.path.exists(res2[1]))
+
+    #assert that labels returned are in a list.
+    assert(type(res2[2]) == type(["cup"]))
+
+    print("Test2 passed for single detection")
+
+    #delete files created during testing
+    for elt in [savepath, savepath2, modelpath]: 
+        os.remove(elt)
+

@@ -274,9 +274,11 @@ def get_drise_saliency_map(
     fig, axis = plt.subplots(1, num_detections,
                              figsize=(num_detections*10, 10))
 
+    label_list = []
     for i in range(num_detections):
         box = detections[img_index].bounding_boxes[i].detach().numpy()
         label = int(torch.argmax(detections[img_index].class_scores[i]))
+        label_list.append(label)
 
         # There is more than one element to display, hence multiple subplots
         # Unclear why, but sometimes even with just one element,
@@ -306,4 +308,4 @@ def get_drise_saliency_map(
             axis = plot_img_bbox(axis, box, str(label), 'r')
 
     fig.savefig(savename)
-    return fig, savename
+    return fig, savename, label_list
