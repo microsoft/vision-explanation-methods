@@ -49,7 +49,7 @@ def test_vision_explain_preloaded():
     assert(os.path.exists(res[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res[2] == list))
+    assert(type(res[2]) == list)
 
     print("Test1 passed for multiple detections")
 
@@ -73,7 +73,7 @@ def test_vision_explain_preloaded():
     assert(os.path.exists(res2[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res2[2] == list))
+    assert(type(res2[2]) == list)
 
     print("Test1 passed for single detection")
 
