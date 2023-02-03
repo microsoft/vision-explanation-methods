@@ -95,7 +95,7 @@ class PytorchFasterRCNNWrapper(
             # We approximate the score for each class
             # by dividing (class score) evenly among the other classes.
 
-            raw_detection = filter_score(raw_detection, 0.2)
+            raw_detection = filter_score(raw_detection, 0.5)
             expanded_class_scores = od_common.expand_class_scores(
                 raw_detection['scores'],
                 raw_detection['labels'],
@@ -274,7 +274,20 @@ def get_drise_saliency_map(
     fig, axis = plt.subplots(1, num_detections,
                              figsize=(num_detections*10, 10))
 
+    label_list = []
     for i in range(num_detections):
+        box = detections[img_index].bounding_boxes[i].detach().numpy()
+        label = int(torch.argmax(detections[img_index].class_scores[i]))
+        label_list.append(label)
+
+        # There is more than one element to display, hence multiple subplots
+        # Unclear why, but sometimes even with just one element,
+        # axis needs to be indexed
+        if num_detections > 1 or type(axis) == list:
+            ax = axis[i]
+        else:
+            ax = axis
+
         viz.visualize_image_attr(
             numpy.transpose(
                 saliency_scores[i]['detection'].cpu().detach().numpy(),
@@ -285,21 +298,14 @@ def get_drise_saliency_map(
             show_colorbar=True,
             cmap=plt.cm.inferno,
             title="Detection " + str(i),
-            plt_fig_axis=(fig, axis[i]),
+            plt_fig_axis=(fig, ax),
             use_pyplot=False
         )
 
-        box = detections[img_index].bounding_boxes[i].detach().numpy()
-        label = int(torch.argmax(detections[img_index].class_scores[i]))
-        # There is more than one element to display, hence multiple subplots
-        if num_detections > 1:
+        if num_detections > 1 or type(axis) == list:
             axis[i] = plot_img_bbox(axis[i], box, str(label), 'r')
-        elif type(axis) != list:
-            axis = plot_img_bbox(axis, box, str(label), 'r')
-        # Unclear why, but sometimes even with just one element,
-        # axis needs to be indexed
         else:
-            axis[i] = plot_img_bbox(axis[i], box, str(label), 'r')
-        fig.savefig(savename)
+            axis = plot_img_bbox(axis, box, str(label), 'r')
 
-    return fig, savename
+    fig.savefig(savename)
+    return fig, savename, label_list
