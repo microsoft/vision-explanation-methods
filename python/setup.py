@@ -38,9 +38,9 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'numpy',
-    'pandas',
-    'scipy',
-    'scikit-learn'
+    'tqdm',
+    # TODO: remove this dependency
+    'matplotlib'
 ]
 
 with open(README_FILE, 'r', encoding='utf-8') as f:
