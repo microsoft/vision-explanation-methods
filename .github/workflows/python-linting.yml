@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements-linting.txt
 
       - name: flake8
-        run: flake8 --exit-zero
+        run: flake8
 
       - name: Check sorted python imports using isort
         run: |
