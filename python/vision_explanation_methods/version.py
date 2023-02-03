@@ -1,3 +1,5 @@
+"""Metadata including name and version of package."""
+
 name = 'vision_explanation_methods'
 _major = '0'
 _minor = '0'
