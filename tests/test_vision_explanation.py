@@ -27,12 +27,11 @@ def download_assets(filepath, force=False):
     return filepath
 
 
-
 def test_vision_explain_preloaded():
     """End to end testing for saliency map generation function."""
-    imgpath = os.path.join('python','vision_explanation_methods','images',
+    imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
                            'cartons.jpg')  # unseen test image
-    savepath = os.path.join('python','vision_explanation_methods','res',
+    savepath = os.path.join('python', 'vision_explanation_methods', 'res',
                             'testoutput_preloaded.jpg')
     # save tested result in res
 
@@ -49,15 +48,15 @@ def test_vision_explain_preloaded():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
-    #assert that labels returned are in a list.
-    assert(type(res[2]) == type(["cup"]))
+    # assert that labels returned are in a list.
+    assert(type(res[2]) == list)
 
     print("Test1 passed for multiple detections")
 
-    imgpath2 = os.path.join('python','vision_explanation_methods','images',
-                           'justmilk.jpg')  # just one carton
-    savepath2 = os.path.join('python','vision_explanation_methods','res',
-                            'testoutput_preloaded2.jpg') 
+    imgpath2 = os.path.join('python', 'vision_explanation_methods', 'images',
+                            'justmilk.jpg')  # just one carton
+    savepath2 = os.path.join('python', 'vision_explanation_methods', 'res',
+                             'testoutput_preloaded2.jpg')
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
@@ -73,24 +72,23 @@ def test_vision_explain_preloaded():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res2[1]))
 
-    #assert that labels returned are in a list.
-    assert(type(res2[2]) == type(["cup"]))
+    # assert that labels returned are in a list.
+    assert(type(res2[2]) == list)
 
     print("Test1 passed for single detection")
 
-    #delete files created during testing
-    for elt in [savepath, savepath2]: 
+    # delete files created during testing
+    for elt in [savepath, savepath2]:
         os.remove(elt)
-
 
 
 def test_vision_explain_loadmodel():
     """End to end testing for saliency map generation function."""
-    imgpath = os.path.join('python','vision_explanation_methods','images',
+    imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
                            'cartons.jpg')  # unseen test image
-    modelpath = os.path.join('python','vision_explanation_methods','models',
+    modelpath = os.path.join('python', 'vision_explanation_methods', 'models',
                              'fastrcnn.pt')  # load fastrcnn model
-    savepath = os.path.join('python','vision_explanation_methods','res',
+    savepath = os.path.join('python', 'vision_explanation_methods', 'res',
                             'testoutput_loadedmodel.jpg')
     # save tested result in res
 
@@ -110,16 +108,15 @@ def test_vision_explain_loadmodel():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
-
-    #assert that labels returned are in a list.
-    assert(type(res[2]) == type(["cup"]))
+    # assert that labels returned are in a list.
+    assert(type(res[2]) == list)
 
     print("Test2 passed for multiple detections")
 
-    imgpath2 = os.path.join('python','vision_explanation_methods','images',
-                           'justmilk.jpg')  # just one carton
-    savepath2 = os.path.join('python','vision_explanation_methods','res',
-                            'testoutput_loadedmodel2.jpg') 
+    imgpath2 = os.path.join('python', 'vision_explanation_methods', 'images',
+                            'justmilk.jpg')  # just one carton
+    savepath2 = os.path.join('python', 'vision_explanation_methods', 'res',
+                             'testoutput_loadedmodel2.jpg')
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
@@ -135,12 +132,11 @@ def test_vision_explain_loadmodel():
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res2[1]))
 
-    #assert that labels returned are in a list.
-    assert(type(res2[2]) == type(["cup"]))
+    # assert that labels returned are in a list.
+    assert(type(res2[2]) == list)
 
     print("Test2 passed for single detection")
 
-    #delete files created during testing
-    for elt in [savepath, savepath2, modelpath]: 
+    # delete files created during testing
+    for elt in [savepath, savepath2, modelpath]:
         os.remove(elt)
-
