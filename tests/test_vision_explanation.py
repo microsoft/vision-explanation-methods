@@ -29,8 +29,9 @@ def download_assets(filepath, force=False):
 
 def test_vision_explain_preloaded():
     """End to end testing for saliency map generation function."""
+    # unseen test image
     imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
-                           'cartons.jpg')  # unseen test image
+                           'cartons.jpg')
     savepath = os.path.join('python', 'vision_explanation_methods', 'res',
                             'testoutput_preloaded.jpg')
     # save tested result in res
@@ -43,18 +44,19 @@ def test_vision_explain_preloaded():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(type(res[0]) == type(fig))
+    assert(isinstance(res[0], type(fig)))
 
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res[2]) == list)
+    assert(isinstance(res[2], list))
 
     print("Test1 passed for multiple detections")
 
+    # just one carton
     imgpath2 = os.path.join('python', 'vision_explanation_methods', 'images',
-                            'justmilk.jpg')  # just one carton
+                            'justmilk.jpg')
     savepath2 = os.path.join('python', 'vision_explanation_methods', 'res',
                              'testoutput_preloaded2.jpg')
 
@@ -67,13 +69,13 @@ def test_vision_explain_preloaded():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(type(res2[0]) == type(fig))
+    assert(isinstance(res2[0], type(fig)))
 
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res2[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res2[2]) == list)
+    assert(isinstance(res2[2], list))
 
     print("Test1 passed for single detection")
 
@@ -84,10 +86,12 @@ def test_vision_explain_preloaded():
 
 def test_vision_explain_loadmodel():
     """End to end testing for saliency map generation function."""
+    # unseen test image
     imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
-                           'cartons.jpg')  # unseen test image
+                           'cartons.jpg')
+    # load fastrcnn model
     modelpath = os.path.join('python', 'vision_explanation_methods', 'models',
-                             'fastrcnn.pt')  # load fastrcnn model
+                             'fastrcnn.pt')
     savepath = os.path.join('python', 'vision_explanation_methods', 'res',
                             'testoutput_loadedmodel.jpg')
     # save tested result in res
@@ -103,18 +107,19 @@ def test_vision_explain_loadmodel():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(type(res[0]) == type(fig))
+    assert(isinstance(res[0], type(fig)))
 
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res[2]) == list)
+    assert(isinstance(res[2], list))
 
     print("Test2 passed for multiple detections")
 
+    # just one carton
     imgpath2 = os.path.join('python', 'vision_explanation_methods', 'images',
-                            'justmilk.jpg')  # just one carton
+                            'justmilk.jpg')
     savepath2 = os.path.join('python', 'vision_explanation_methods', 'res',
                              'testoutput_loadedmodel2.jpg')
 
@@ -127,13 +132,13 @@ def test_vision_explain_loadmodel():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(type(res2[0]) == type(fig))
+    assert(isinstance(res2[0], type(fig)))
 
     # assert that figure has been saved in proper location.
     assert(os.path.exists(res2[1]))
 
     # assert that labels returned are in a list.
-    assert(type(res2[2]) == list)
+    assert(isinstance(res2[2], list))
 
     print("Test2 passed for single detection")
 
