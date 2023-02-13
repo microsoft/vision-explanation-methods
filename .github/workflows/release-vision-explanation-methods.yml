@@ -1,0 +1,86 @@
+name: Release vision-explanation-methods to PyPI
+
+# trigger manually only ("collaborator" or more permissions required)
+on:
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        description: "Test or Prod PyPI?"
+        required: true
+        default: "Test"
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: fail if Test nor Prod
+        if: ${{ ! (github.event.inputs.releaseType == 'Test' || github.event.inputs.releaseType == 'Prod') }}
+        run: |
+          echo "Only Test or Prod can be used."
+          exit 1
+
+      - uses: actions/checkout@v3
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.8
+
+        name: Install pytorch
+        shell: bash -l {0}
+        run: |
+          conda install --yes --quiet pytorch torchvision captum cpuonly -c pytorch -c conda-forge
+
+      - name: update and upgrade pip, setuptools, wheel, and twine
+        shell: bash -l {0}
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools wheel twine
+
+      - name: install requirements for vision-explanation-methods
+        shell: bash -l {0}
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: pip freeze
+        shell: bash -l {0}
+        run: pip freeze
+
+      - name: build wheel for vision-explanation-methods
+        shell: bash -l {0}
+        run: python setup.py sdist bdist_wheel
+        working-directory: python
+
+      # run tests before publishing to PyPI
+      - name: install vision-explanation-methods wheel locally
+        shell: bash -l {0}
+        run: find ./dist/ -name '*.whl' -exec pip install {} \;
+        working-directory: python
+
+      - name: run vision-explanation-methods tests
+        shell: bash -l {0}
+        run: pytest ./tests -s -v
+
+      - name: Upload a vision-explanation-methods build result
+        uses: actions/upload-artifact@v2
+        with:
+          name: vision_explanation_methods
+          path: python/dist/
+
+      # publish to PyPI
+      - name: Publish vision-explanation-methods package to Test PyPI
+        if: ${{ github.event.inputs.releaseType == 'Test' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN_VISION_EXPLANATION_METHODS }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: python/dist/
+      - name: Publish vision-explanation-methods package to PyPI
+        if: ${{ github.event.inputs.releaseType == 'Prod' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN_VISION_EXPLANATION_METHODS }}
+          packages_dir: python/dist/
