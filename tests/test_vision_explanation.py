@@ -58,7 +58,7 @@ def test_vision_explain_preloaded():
     imgpath2 = os.path.join('python', 'vision_explanation_methods', 'images',
                             'justmilk.jpg')
     savepath2 = os.path.join('python', 'vision_explanation_methods', 'res',
-                             'testoutput_preloaded2.png')
+                             'testoutput_preloaded2.jpg')
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
