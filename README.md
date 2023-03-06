@@ -15,7 +15,7 @@ D-RISE is a black-boxed, or model-agnostic, explainability method which can prod
 
 To install the vision explanation package, run:
 ```
-pip install vision-explanation-package
+pip install vision-explanation-methods
 ```
 
 ## Colab
