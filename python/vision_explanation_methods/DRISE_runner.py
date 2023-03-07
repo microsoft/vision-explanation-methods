@@ -70,14 +70,12 @@ def get_instance_segmentation_model(num_classes: int):
 def get_drise_saliency_map(
         imagelocation: str,
         model: Optional[object],
-        modellocation: Optional[str], #TODIFX
         numclasses: int,
         savename: str,
         nummasks: int = 25,
         maskres: Tuple[int, int] = (4, 4),
         maskpadding: Optional[int] = None,
-        devicechoice: Optional[str] = None,
-        wrapperchoice: Optional[object] = PytorchFasterRCNNWrapper
+        devicechoice: Optional[str] = None
 ):
     """Run D-RISE on image and visualize the saliency maps.
 
@@ -86,9 +84,6 @@ def get_drise_saliency_map(
     :param model: Input model for D-RISE. If None, Faster R-CNN model
         will be used.
     :type model: PyTorch model
-    :param modellocation: Path of the model weights. If None, pre-trained
-        Faster R-CNN model will be used.
-    :type modellocation: Optional str
     :param numclasses: Number of classes model predicted
     :type numclasses: int
     :param savename: Path of the saved output figure
@@ -112,43 +107,13 @@ def get_drise_saliency_map(
     else:
         device = devicechoice
 
-    # if not model:
-    #     if not modellocation:
-    #         # If user did not specify a model location,
-    #         # we simply load in the pytorch pre-trained model.
-    #         print("using pretrained fastercnn model")
-    #         model = detection.fasterrcnn_resnet50_fpn(pretrained=True,
-    #                                                   map_location=device)
-    #         numclasses = 91
-
-    #     else:
-    #         print("loading user fastercnn model")
-    #         model = get_instance_segmentation_model(numclasses)
-    #         model.load_state_dict(
-    #             torch.load(modellocation, map_location=device))
-    # else:
-    #     if modellocation:
-    #         print("loading any user model")
-    #         model.load_state_dict(
-    #             torch.load(modellocation, map_location=device))
-
     test_image = Image.open(imagelocation).convert('RGB')
 
-    # model = model.to(device)
-    # model.eval()
-
-    # if not wrapperchoice:
-    #     wrapperchoice = PytorchFasterRCNNWrapper
-      
-    # explainable_wrapper = wrapperchoice(model, numclasses)
-
-    explainable_wrapper = model
-
-    detections = explainable_wrapper.predict(
+    detections = model.predict(
         T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
 
     saliency_scores = drise.DRISE_saliency(
-        model=explainable_wrapper,
+        model=model,
         # Repeated the tensor to test batching
         image_tensor=T.ToTensor()(test_image).repeat(2, 1, 1, 1).to(device),
         target_detections=detections,
