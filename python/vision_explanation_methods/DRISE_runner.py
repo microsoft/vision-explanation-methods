@@ -13,6 +13,7 @@ from captum.attr import visualization as viz
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from ml_wrappers.model.image_model_wrapper import PytorchFasterRCNNWrapper
 
 from .explanations import drise
 
@@ -108,8 +109,9 @@ def get_drise_saliency_map(
 
     if not model:
         print("using pretrained fastercnn model")
-        model = detection.fasterrcnn_resnet50_fpn(pretrained=True,
-                                                  map_location=device)
+        model = PytorchFasterRCNNWrapper(
+            detection.fasterrcnn_resnet50_fpn(pretrained=True,
+                                              map_location=device), numclasses)
 
     test_image = Image.open(imagelocation).convert('RGB')
 
