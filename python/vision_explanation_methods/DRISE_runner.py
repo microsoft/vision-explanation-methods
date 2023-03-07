@@ -13,105 +13,10 @@ from captum.attr import visualization as viz
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from ml_wrappers.model.image_model_wrapper import PytorchFasterRCNNWrapper
 
 from .explanations import common as od_common
 from .explanations import drise
-
-
-class PytorchFasterRCNNWrapper(
-        od_common.GeneralObjectDetectionModelWrapper):
-    """Wraps a PytorchFasterRCNN model with a predict API function.
-
-    To be compatible with the D-RISE explainability method,
-    all models must be wrapped to have the same output and input class and a
-    predict function for object detection. This wrapper is customized for the
-    FasterRCNN model from Pytorch, and can also be used with the RetinaNet or
-    any other models with the same output class.
-
-    :param model: Object detection model
-    :type model: PytorchFasterRCNN model
-    :param number_of_classes: Number of classes the model is predicting
-    :type number_of_classes: int
-    """
-
-    def __init__(self, model, number_of_classes: int):
-        """Initialize the PytorchFasterRCNNWrapper."""
-        self._model = model
-        self._number_of_classes = number_of_classes
-
-    def predict(self, x: torch.Tensor) -> List[od_common.DetectionRecord]:
-        """Create a list of detection records from the image predictions.
-
-        :param x: Tensor of the image
-        :type x: torch.Tensor
-        :return: Baseline detections to get saliency maps for
-        :rtype: List of Detection Records
-        """
-        raw_detections = self._model(x)
-
-        def apply_nms(orig_prediction: dict, iou_thresh: float = 0.5):
-            """Perform nms on the predictions based on their IoU.
-
-            :param orig_prediction: Original model prediction
-            :type orig_prediction: dict
-            :param iou_thresh: iou_threshold for nms
-            :type iou_thresh: float
-            :return: Model prediction after nms is applied
-            :rtype: dict
-            """
-            keep = torchvision.ops.nms(orig_prediction['boxes'],
-                                       orig_prediction['scores'], iou_thresh)
-
-            nms_prediction = orig_prediction
-            nms_prediction['boxes'] = nms_prediction['boxes'][keep]
-            nms_prediction['scores'] = nms_prediction['scores'][keep]
-            nms_prediction['labels'] = nms_prediction['labels'][keep]
-            return nms_prediction
-
-        def filter_score(orig_prediction: dict, score_thresh: float = 0.5):
-            """Filter out predictions with confidence scores < score_thresh.
-
-            :param orig_prediction: Original model prediction
-            :type orig_prediction: dict
-            :param score_thresh: Score threshold to filter by
-            :type score_thresh: float
-            :return: Model predictions filtered out by score_thresh
-            :rtype: dict
-            """
-            keep = orig_prediction['scores'] > score_thresh
-
-            filter_prediction = orig_prediction
-            filter_prediction['boxes'] = filter_prediction['boxes'][keep]
-            filter_prediction['scores'] = filter_prediction['scores'][keep]
-            filter_prediction['labels'] = filter_prediction['labels'][keep]
-            return filter_prediction
-
-        detections = []
-        for raw_detection in raw_detections:
-            raw_detection = apply_nms(raw_detection, 0.005)
-
-            # Note that FasterRCNN doesn't return a score for each class, only
-            # the predicted class. DRISE requires a score for each class.
-            # We approximate the score for each class
-            # by dividing (class score) evenly among the other classes.
-
-            raw_detection = filter_score(raw_detection, 0.5)
-            expanded_class_scores = od_common.expand_class_scores(
-                raw_detection['scores'],
-                raw_detection['labels'],
-                self._number_of_classes)
-
-            detections.append(
-                od_common.DetectionRecord(
-                    bounding_boxes=raw_detection['boxes'],
-                    class_scores=expanded_class_scores,
-                    objectness_scores=torch.tensor(
-                        [1.0]*raw_detection['boxes'].shape[0]),
-                )
-            )
-
-        return detections
-
 
 def plot_img_bbox(ax: matplotlib.axes._subplots, box: numpy.ndarray,
                   label: str, color: str):
@@ -165,7 +70,7 @@ def get_instance_segmentation_model(num_classes: int):
 def get_drise_saliency_map(
         imagelocation: str,
         model: Optional[object],
-        modellocation: Optional[str],
+        modellocation: Optional[str], #TODIFX
         numclasses: int,
         savename: str,
         nummasks: int = 25,
@@ -207,34 +112,37 @@ def get_drise_saliency_map(
     else:
         device = devicechoice
 
-    if not model:
-        if not modellocation:
-            # If user did not specify a model location,
-            # we simply load in the pytorch pre-trained model.
-            print("using pretrained fastercnn model")
-            model = detection.fasterrcnn_resnet50_fpn(pretrained=True,
-                                                      map_location=device)
-            numclasses = 91
+    # if not model:
+    #     if not modellocation:
+    #         # If user did not specify a model location,
+    #         # we simply load in the pytorch pre-trained model.
+    #         print("using pretrained fastercnn model")
+    #         model = detection.fasterrcnn_resnet50_fpn(pretrained=True,
+    #                                                   map_location=device)
+    #         numclasses = 91
 
-        else:
-            print("loading user fastercnn model")
-            model = get_instance_segmentation_model(numclasses)
-            model.load_state_dict(
-                torch.load(modellocation, map_location=device))
-    else:
-        if modellocation:
-            print("loading any user model")
-            model.load_state_dict(
-                torch.load(modellocation, map_location=device))
+    #     else:
+    #         print("loading user fastercnn model")
+    #         model = get_instance_segmentation_model(numclasses)
+    #         model.load_state_dict(
+    #             torch.load(modellocation, map_location=device))
+    # else:
+    #     if modellocation:
+    #         print("loading any user model")
+    #         model.load_state_dict(
+    #             torch.load(modellocation, map_location=device))
 
     test_image = Image.open(imagelocation).convert('RGB')
 
-    model = model.to(device)
-    model.eval()
+    # model = model.to(device)
+    # model.eval()
 
-    if not wrapperchoice:
-        wrapperchoice = PytorchFasterRCNNWrapper
-    explainable_wrapper = wrapperchoice(model, numclasses)
+    # if not wrapperchoice:
+    #     wrapperchoice = PytorchFasterRCNNWrapper
+      
+    # explainable_wrapper = wrapperchoice(model, numclasses)
+
+    explainable_wrapper = model
 
     detections = explainable_wrapper.predict(
         T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
