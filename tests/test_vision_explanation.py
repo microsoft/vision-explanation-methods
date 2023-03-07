@@ -9,7 +9,7 @@ import urllib.request as request_file
 import torch
 
 import matplotlib.pyplot as plt
-from ..python.vision_explanation_methods import DRISE_runner as dr
+import vision_explanation_methods.DRISE_runner as dr
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
