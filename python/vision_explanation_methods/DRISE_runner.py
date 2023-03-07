@@ -1,22 +1,20 @@
 """Method for generating saliency maps for object detection models."""
 
 import os
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import torch
 import torchvision
-import torchvision.models.detection as detection
 from captum.attr import visualization as viz
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from ml_wrappers.model.image_model_wrapper import PytorchFasterRCNNWrapper
 
-from .explanations import common as od_common
 from .explanations import drise
+
 
 def plot_img_bbox(ax: matplotlib.axes._subplots, box: numpy.ndarray,
                   label: str, color: str):
