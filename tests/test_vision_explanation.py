@@ -6,9 +6,10 @@
 
 import os
 import urllib.request as request_file
+import torch
 
 import matplotlib.pyplot as plt
-import vision_explanation_methods.DRISE_runner as dr
+from ..python.vision_explanation_methods import DRISE_runner as dr
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
@@ -37,7 +38,7 @@ def test_vision_explain_preloaded():
     # save tested result in res
 
     # run the main function for saliency map generation
-    res = dr.get_drise_saliency_map(imgpath, None, None, None, savepath)
+    res = dr.get_drise_saliency_map(imgpath, None, None, savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -100,7 +101,9 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    res = dr.get_drise_saliency_map(imgpath, None, modelpath, 5, savepath)
+    model = None
+    model.load_state_dict(torch.load(modelpath, map_location='cpu'))
+    res = dr.get_drise_saliency_map(imgpath, model, 5, savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)

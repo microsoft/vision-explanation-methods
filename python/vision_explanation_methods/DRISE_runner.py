@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy
 import torch
 import torchvision
+import torchvision.models.detection as detection
 from captum.attr import visualization as viz
 from PIL import Image
 from torchvision import transforms as T
@@ -104,6 +105,11 @@ def get_drise_saliency_map(
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
         device = devicechoice
+
+    if not model:
+        print("using pretrained fastercnn model")
+        model = detection.fasterrcnn_resnet50_fpn(pretrained=True,
+                                                  map_location=device)
 
     test_image = Image.open(imagelocation).convert('RGB')
 
