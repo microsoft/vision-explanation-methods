@@ -4,10 +4,11 @@
 
 """Test functions for the vision-explanation-methods package."""
 
-import matplotlib.pyplot as plt
 import os
-import torch
 import urllib.request as request_file
+
+import matplotlib.pyplot as plt
+import torch
 import vision_explanation_methods.DRISE_runner as dr
 
 # execute tests from the root folder as follows:
