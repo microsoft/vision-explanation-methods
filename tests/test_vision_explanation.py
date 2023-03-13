@@ -52,7 +52,11 @@ def test_vision_explain_preloaded():
     # save tested result in res
 
     # run the main function for saliency map generation
-    res = dr.get_drise_saliency_map(imgpath, None, None, savepath)
+    res = dr.get_drise_saliency_map(imagelocation=imgpath,
+                                    model=None,
+                                    modellocation=None,
+                                    numclasses=None,
+                                    savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -77,7 +81,11 @@ def test_vision_explain_preloaded():
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
-    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+    res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
+                                     model=None,
+                                     modellocation=None,
+                                     numclasses=None,
+                                     savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
@@ -141,7 +149,11 @@ def test_vision_explain_loadmodel():
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
-    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+    res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
+                                     model=None,
+                                     modellocation=None,
+                                     numclasses=None,
+                                     savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
