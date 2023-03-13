@@ -150,23 +150,9 @@ def get_drise_saliency_map(
         fail = fail.save(savename)
         return None, None
 
-    fig, axis = plt.subplots(1, num_detections,
-                             figsize=(num_detections*10, 10))
+    fig = plt.figure()
 
-    label_list = []
     for i in range(num_detections):
-        box = detections[img_index].bounding_boxes[i].detach().numpy()
-        label = int(torch.argmax(detections[img_index].class_scores[i]))
-        label_list.append(label)
-
-        # There is more than one element to display, hence multiple subplots
-        # Unclear why, but sometimes even with just one element,
-        # axis needs to be indexed
-        if num_detections > 1 or type(axis) == list:
-            ax = axis[i]
-        else:
-            ax = axis
-
         viz.visualize_image_attr(
             numpy.transpose(
                 saliency_scores[i]['detection'].cpu().detach().numpy(),
@@ -177,14 +163,7 @@ def get_drise_saliency_map(
             show_colorbar=True,
             cmap=plt.cm.inferno,
             title="Detection " + str(i),
-            plt_fig_axis=(fig, ax),
             use_pyplot=False
         )
 
-        if num_detections > 1 or type(axis) == list:
-            axis[i] = plot_img_bbox(axis[i], box, str(label), 'r')
-        else:
-            axis = plot_img_bbox(axis, box, str(label), 'r')
-
-    fig.savefig(savename)
-    return fig, savename, label_list
+        fig.savefig(savename+str(i))
