@@ -247,11 +247,11 @@ def expand_class_scores(
     """
     number_of_detections = scores.shape[0]
 
-    expanded_scores = torch.ones(number_of_detections, number_of_classes)
+    expanded_scores = torch.ones(number_of_detections, number_of_classes + 1)
 
     for i, (score, label) in enumerate(zip(scores, labels)):
 
-        residual = (1. - score.item()) / (number_of_classes - 1)
+        residual = (1. - score.item()) / (number_of_classes)
         expanded_scores[i, :] *= residual
         expanded_scores[i, label.item()] = score
 
