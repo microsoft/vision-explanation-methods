@@ -4,12 +4,26 @@
 
 """Test functions for the vision-explanation-methods package."""
 
+import logging
 import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
-import torch
-import vision_explanation_methods.DRISE_runner as dr
+
+module_logger = logging.getLogger(__name__)
+module_logger.setLevel(logging.INFO)
+
+try:
+    import torch
+except ImportError:
+    module_logger.debug('Could not import torch, required if using a' +
+                        'PyTorch model')
+
+try:
+    import vision_explanation_methods.DRISE_runner as dr
+except ImportError:
+    module_logger.debug('Could not import torch, required if using a' +
+                        'PyTorch model')
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
