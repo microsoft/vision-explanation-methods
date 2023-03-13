@@ -10,7 +10,7 @@ import torch
 import torchvision
 import torchvision.models.detection as detection
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import PytorchFasterRCNNWrapper
+from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -109,7 +109,7 @@ def get_drise_saliency_map(
 
     if not model:
         print("using pretrained fastercnn model")
-        model = PytorchFasterRCNNWrapper(
+        model = PytorchDRiseWrapper(
             detection.fasterrcnn_resnet50_fpn(pretrained=True,
                                               map_location=device), numclasses)
 
