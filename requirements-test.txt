@@ -1,3 +1,4 @@
 pytest
 pytest-cov
-ml_wrappers 
+ml_wrappers
+vision_explanation_methods
