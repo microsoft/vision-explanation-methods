@@ -9,8 +9,7 @@ import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
-
-from ..python.vision_explanation_methods import DRISE_runner as dr
+import vision_explanation_methods.DRISE_runner as dr
 
 module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.INFO)
