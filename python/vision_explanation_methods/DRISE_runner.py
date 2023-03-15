@@ -152,6 +152,8 @@ def get_drise_saliency_map(
 
     fig = plt.figure()
 
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+
     for i in range(num_detections):
         viz.visualize_image_attr(
             numpy.transpose(
@@ -163,7 +165,8 @@ def get_drise_saliency_map(
             show_colorbar=True,
             cmap=plt.cm.inferno,
             title="Detection " + str(i),
+            plt_fig_axis=(fig, ax),
             use_pyplot=False
         )
 
-        fig.savefig(savename+str(i))
+        fig.savefig(savename+str(i)+".jpg")
