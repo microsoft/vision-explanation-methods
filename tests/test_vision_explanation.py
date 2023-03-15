@@ -118,8 +118,14 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    model = (torch.load(modelpath, map_location='cpu'))
-    res = dr.get_drise_saliency_map(imgpath, model, 5, savepath)
+    model = (torch.load(modelpath,
+                        map_location='cuda' if torch.cuda.is_available()
+                        else 'cpu'))
+    res = dr.get_drise_saliency_map(imagelocation=imgpath,
+                                    model=model,
+                                    modellocation=None,
+                                    numclasses=5,
+                                    savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)

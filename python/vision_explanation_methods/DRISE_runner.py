@@ -108,7 +108,6 @@ def get_drise_saliency_map(
         device = devicechoice
 
     if not model:
-        print("using pretrained fastercnn model")
         model = PytorchDRiseWrapper(
             detection.fasterrcnn_resnet50_fpn(pretrained=True,
                                               map_location=device), numclasses)
