@@ -72,7 +72,7 @@ def get_drise_saliency_map(
         model: Optional[object],
         numclasses: int,
         savename: str,
-        nummasks: int = 25,
+        nummasks: int = 250,
         maskres: Tuple[int, int] = (4, 4),
         maskpadding: Optional[int] = None,
         devicechoice: Optional[str] = None
@@ -163,7 +163,7 @@ def get_drise_saliency_map(
             method="blended_heat_map",
             sign="positive",
             show_colorbar=True,
-            cmap=plt.cm.inferno,
+            cmap=plt.cm.gist_rainbow,
             title="Detection " + str(i),
             plt_fig_axis=(fig, ax),
             use_pyplot=False
