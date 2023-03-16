@@ -296,7 +296,7 @@ def get_drise_saliency_map(
             method="blended_heat_map",
             sign="positive",
             show_colorbar=True,
-            cmap=plt.cm.inferno,
+            cmap=plt.cm.gist_rainbow,
             title="Detection " + str(i),
             plt_fig_axis=(fig, ax),
             use_pyplot=False
