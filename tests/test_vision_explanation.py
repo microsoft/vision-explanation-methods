@@ -138,9 +138,7 @@ def test_vision_explain_loadmodel():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = _get_instance_segmentation_model(91)
-    _ = download_assets('Recycling_finetuned_FastRCNN.pt')
-    model.load_state_dict(torch.load('Recycling_finetuned_FastRCNN.pt',
-                                     device))
+    model.load_state_dict(torch.load(modelpath, device))
     model.to(device)
 
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
