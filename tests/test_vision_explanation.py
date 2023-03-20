@@ -17,8 +17,10 @@ module_logger.setLevel(logging.INFO)
 
 try:
     import torch
+    import torchvision
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
-    module_logger.debug('Could not import torch, required if using a' +
+    module_logger.debug('Could not import torch packages, required if using a' +
                         'PyTorch model')
 
 # execute tests from the root folder as follows:
@@ -101,6 +103,16 @@ def test_vision_explain_preloaded():
         os.remove(elt)
 
 
+def _get_instance_segmentation_model(num_classes):
+    # load an instance segmentation model pre-trained on COCO
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True)
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+    return model
+
+
 def test_vision_explain_loadmodel():
     """End to end testing for saliency map generation function."""
     # unseen test image
@@ -117,10 +129,20 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    model = PytorchDRiseWrapper(torch.load(modelpath,
-                                map_location='cuda'
-                                if torch.cuda.is_available()
-                                else 'cpu'), 91)
+    # empty_model = PytorchDRiseWrapper()
+    # path = torch.load(modelpath,
+    #                   map_location='cuda'
+    #                   if torch.cuda.is_available()
+    #                   else 'cpu')
+    # model = empty_model.load_state_dict(PytorchDRiseWrapper(path, 91))
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = _get_instance_segmentation_model(91)
+    _ = download_assets('Recycling_finetuned_FastRCNN.pt')
+    model.load_state_dict(torch.load('Recycling_finetuned_FastRCNN.pt',
+                                     device))
+    model.to(device)
+
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=model,
                                     numclasses=91,
