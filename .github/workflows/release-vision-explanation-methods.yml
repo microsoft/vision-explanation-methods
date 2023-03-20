@@ -30,7 +30,7 @@ jobs:
         name: Install pytorch
         shell: bash -l {0}
         run: |
-          conda install --yes --quiet pytorch torchvision captum cpuonly -c pytorch -c conda-forge
+          conda install --yes --quiet pytorch torchvision captum cpuonly -c pytorch -c conda-forge --strict-channel-priority
 
       - name: update and upgrade pip, setuptools, wheel, and twine
         shell: bash -l {0}
