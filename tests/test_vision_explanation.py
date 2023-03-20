@@ -118,8 +118,9 @@ def test_vision_explain_loadmodel():
 
     # run the main function for saliency map generation
     model = PytorchDRiseWrapper(torch.load(modelpath,
-                                map_location='cuda' if torch.cuda.is_available()
-                                else 'cpu'))
+                                map_location='cuda'
+                                if torch.cuda.is_available()
+                                else 'cpu'), 91)
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=model,
                                     numclasses=91,
