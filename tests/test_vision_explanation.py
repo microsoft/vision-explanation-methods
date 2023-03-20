@@ -50,7 +50,6 @@ def test_vision_explain_preloaded():
     # run the main function for saliency map generation
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=None,
-                                    modellocation=None,
                                     numclasses=None,
                                     savename=savepath)
 
@@ -79,7 +78,6 @@ def test_vision_explain_preloaded():
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
-                                     modellocation=None,
                                      numclasses=None,
                                      savename=savepath2)
 
@@ -124,7 +122,6 @@ def test_vision_explain_loadmodel():
                         else 'cpu'))
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=model,
-                                    modellocation=None,
                                     numclasses=5,
                                     savename=savepath)
 
@@ -153,7 +150,6 @@ def test_vision_explain_loadmodel():
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
-                                     modellocation=None,
                                      numclasses=None,
                                      savename=savepath2)
 
