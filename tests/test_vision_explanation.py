@@ -9,6 +9,7 @@ import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
+from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 import vision_explanation_methods.DRISE_runner as dr
 
 module_logger = logging.getLogger(__name__)
@@ -116,12 +117,12 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    model = (torch.load(modelpath,
-                        map_location='cuda' if torch.cuda.is_available()
-                        else 'cpu'))
+    model = PytorchDRiseWrapper(torch.load(modelpath,
+                                map_location='cuda' if torch.cuda.is_available()
+                                else 'cpu'))
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=model,
-                                    numclasses=87,
+                                    numclasses=91,
                                     savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
