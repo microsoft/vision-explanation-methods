@@ -8,14 +8,20 @@ import matplotlib.pyplot as plt
 import numpy
 import torch
 import torchvision
-import torchvision.models.detection as detection
 from captum.attr import visualization as viz
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from PIL import Image
 from torchvision import transforms as T
+from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 from .explanations import drise
+
+try:
+    from matplotlib.axes._subplots import AxesSubplot
+except ImportError:
+    # For matplotlib >= 3.7.0
+    from matplotlib.axes import Subplot as AxesSubplot
 
 
 def plot_img_bbox(ax: matplotlib.axes._subplots, box: numpy.ndarray,
