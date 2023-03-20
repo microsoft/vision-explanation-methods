@@ -9,7 +9,6 @@ import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
-
 import vision_explanation_methods.DRISE_runner as dr
 
 module_logger = logging.getLogger(__name__)
