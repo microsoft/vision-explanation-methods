@@ -26,10 +26,26 @@ jobs:
       with:
         auto-update-conda: true
         python-version: ${{ matrix.pythonVersion }}
-    - name: Install pytorch
+    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion != '3.7' }}
+      name: Install pytorch on windows for python 3.8 and above
       shell: bash -l {0}
       run: |
-        conda install --yes --quiet pytorch torchvision captum cpuonly -c pytorch -c conda-forge
+        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly "libtiff<4.5.0" -c pytorch -c conda-forge
+    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion == '3.7' }}
+      name: Install pytorch on non-windows for python 3.7
+      shell: bash -l {0}
+      run: |
+        conda install --yes --quiet "pytorch==1.13.1" torchvision captum cpuonly -c pytorch
+    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion == '3.7' }}
+      name: Install pytorch on windows for python 3.7
+      shell: bash -l {0}
+      run: |
+        conda install --yes --quiet "pytorch::pytorch==1.13.1" pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
+    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion != '3.7' }}
+      name: Install pytorch on non-windows for python 3.8 and above
+      shell: bash -l {0}
+      run: |
+        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
     - name: Install package
       shell: bash -l {0}
       run: |
