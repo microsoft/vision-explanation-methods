@@ -100,10 +100,6 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
-    :param devicechoice: Device to use to run the function
-    :type devicechoice: str
-    :param wrapperchoice: Choice to use fastrcnn wrapper or custom wrapper
-    :type wrapperchoice: class
     :return: Tuple of Matplotlib figure, path to where the output
         figure is saved
     :rtype: Tuple of Matplotlib figure, str

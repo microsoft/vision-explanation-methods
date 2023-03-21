@@ -129,13 +129,6 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    # empty_model = PytorchDRiseWrapper()
-    # path = torch.load(modelpath,
-    #                   map_location='cuda'
-    #                   if torch.cuda.is_available()
-    #                   else 'cpu')
-    # model = empty_model.load_state_dict(PytorchDRiseWrapper(path, 91))
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = _get_instance_segmentation_model(5)
     model.load_state_dict(torch.load(modelpath, device))
