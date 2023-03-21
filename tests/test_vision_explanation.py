@@ -137,13 +137,13 @@ def test_vision_explain_loadmodel():
     # model = empty_model.load_state_dict(PytorchDRiseWrapper(path, 91))
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = _get_instance_segmentation_model(91)
+    model = _get_instance_segmentation_model(5)
     model.load_state_dict(torch.load(modelpath, device))
     model.to(device)
 
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=model,
-                                    numclasses=91,
+                                    numclasses=5,
                                     savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
