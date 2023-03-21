@@ -4,11 +4,24 @@
 
 """Test functions for the vision-explanation-methods package."""
 
+import logging
 import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
 import vision_explanation_methods.DRISE_runner as dr
+from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
+
+module_logger = logging.getLogger(__name__)
+module_logger.setLevel(logging.INFO)
+
+try:
+    import torch
+    import torchvision
+    from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+except ImportError:
+    module_logger.debug('Could not import torch packages, required' +
+                        'if using a PyTorch model')
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
@@ -37,7 +50,10 @@ def test_vision_explain_preloaded():
     # save tested result in res
 
     # run the main function for saliency map generation
-    res = dr.get_drise_saliency_map(imgpath, None, None, None, savepath)
+    res = dr.get_drise_saliency_map(imagelocation=imgpath,
+                                    model=None,
+                                    numclasses=87,
+                                    savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -62,7 +78,10 @@ def test_vision_explain_preloaded():
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
-    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+    res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
+                                     model=None,
+                                     numclasses=87,
+                                     savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
@@ -84,6 +103,16 @@ def test_vision_explain_preloaded():
         os.remove(elt)
 
 
+def _get_instance_segmentation_model(num_classes):
+    # load an instance segmentation model pre-trained on COCO
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+        pretrained=True)
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+    return model
+
+
 def test_vision_explain_loadmodel():
     """End to end testing for saliency map generation function."""
     # unseen test image
@@ -100,7 +129,17 @@ def test_vision_explain_loadmodel():
     _ = download_assets(modelpath)
 
     # run the main function for saliency map generation
-    res = dr.get_drise_saliency_map(imgpath, None, modelpath, 5, savepath)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = _get_instance_segmentation_model(5)
+    model.load_state_dict(torch.load(modelpath, device))
+    model.to(device)
+
+    res = dr.get_drise_saliency_map(imagelocation=imgpath,
+                                    model=PytorchDRiseWrapper(
+                                          model=model,
+                                          number_of_classes=91),
+                                    numclasses=5,
+                                    savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -125,7 +164,10 @@ def test_vision_explain_loadmodel():
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
-    res2 = dr.get_drise_saliency_map(imgpath2, None, None, None, savepath2)
+    res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
+                                     model=None,
+                                     numclasses=87,
+                                     savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
