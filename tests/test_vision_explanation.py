@@ -9,8 +9,8 @@ import os
 import urllib.request as request_file
 
 import matplotlib.pyplot as plt
-from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 import vision_explanation_methods.DRISE_runner as dr
+from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 
 module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.INFO)
