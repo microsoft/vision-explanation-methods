@@ -20,8 +20,8 @@ try:
     import torchvision
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
-    module_logger.debug('Could not import torch packages, required if using a' +
-                        'PyTorch model')
+    module_logger.debug('Could not import torch packages, required' +
+                        'if using a PyTorch model')
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
