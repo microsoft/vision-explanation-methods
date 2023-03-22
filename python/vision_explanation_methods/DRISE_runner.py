@@ -170,3 +170,4 @@ def get_drise_saliency_map(
         )
 
         fig.savefig(savename+str(i)+".jpg")
+        print(savename+str(i))
