@@ -40,7 +40,8 @@ DEPENDENCIES = [
     'numpy',
     'tqdm',
     # TODO: remove this dependency
-    'matplotlib'
+    'matplotlib<3.7.0',
+    'ml_wrappers'
 ]
 
 with open(README_FILE, 'r', encoding='utf-8') as f:

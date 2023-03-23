@@ -8,17 +8,28 @@ import matplotlib.pyplot as plt
 import numpy
 import torch
 import torchvision
-import torchvision.models.detection as detection
 from captum.attr import visualization as viz
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from PIL import Image
 from torchvision import transforms as T
+from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 from .explanations import drise
 
+<<<<<<< HEAD
 
 def plot_img_bbox(ax: matplotlib.axes._subplots, box: numpy.ndarray,
+=======
+try:
+    from matplotlib.axes._subplots import AxesSubplot
+except ImportError:
+    # For matplotlib >= 3.7.0
+    from matplotlib.axes import Subplot as AxesSubplot
+
+
+def plot_img_bbox(ax: AxesSubplot, box: numpy.ndarray,
+>>>>>>> main
                   label: str, color: str):
     """Plot predicted bounding box and label on the D-RISE saliency map.
 
@@ -94,10 +105,6 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
-    :param devicechoice: Device to use to run the function
-    :type devicechoice: str
-    :param wrapperchoice: Choice to use fastrcnn wrapper or custom wrapper
-    :type wrapperchoice: class
     :return: Tuple of Matplotlib figure, path to where the output
         figure is saved
     :rtype: Tuple of Matplotlib figure, str
@@ -108,7 +115,6 @@ def get_drise_saliency_map(
         device = devicechoice
 
     if not model:
-        print("using pretrained fastercnn model")
         model = PytorchDRiseWrapper(
             detection.fasterrcnn_resnet50_fpn(pretrained=True,
                                               map_location=device), numclasses)
