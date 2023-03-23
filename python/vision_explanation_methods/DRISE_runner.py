@@ -104,7 +104,7 @@ def get_drise_saliency_map(
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
     :return: Tuple of Matplotlib figure list, path to where the output
-        figure is saved, list of labels 
+        figure is saved, list of labels
     :rtype: Tuple of - list of Matplotlib figures, str, list
     """
     if not devicechoice:
