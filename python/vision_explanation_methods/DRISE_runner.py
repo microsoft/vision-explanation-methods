@@ -103,9 +103,9 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
-    :return: Tuple of Matplotlib figure, path to where the output
-        figure is saved
-    :rtype: Tuple of Matplotlib figure, str
+    :return: Tuple of Matplotlib figure list, path to where the output
+        figure is saved, list of labels 
+    :rtype: Tuple of - list of Matplotlib figures, str, list
     """
     if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -154,11 +154,14 @@ def get_drise_saliency_map(
         fail = fail.save(savename)
         return None, None
 
-    fig = plt.figure()
-
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-
+    label_list = []
+    fig_list = []
     for i in range(num_detections):
+        fig = plt.figure()
+        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+        label = int(torch.argmax(detections[img_index].class_scores[i]))
+        label_list.append(label)
+
         viz.visualize_image_attr(
             numpy.transpose(
                 saliency_scores[i]['detection'].cpu().detach().numpy(),
@@ -174,3 +177,5 @@ def get_drise_saliency_map(
         )
 
         fig.savefig(savename+str(i)+IMAGE_TYPE)
+        fig_list.append(fig)
+    return fig, savename, label_list

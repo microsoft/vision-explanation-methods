@@ -65,10 +65,10 @@ def test_vision_explain_preloaded():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0], type(fig)))
+    assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]))
+    assert(os.path.exists(res[1]+"0"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
@@ -93,10 +93,10 @@ def test_vision_explain_preloaded():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0], type(fig)))
+    assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]))
+    assert(os.path.exists(res2[1]+"0"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
@@ -151,10 +151,10 @@ def test_vision_explain_loadmodel():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0], type(fig)))
+    assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]))
+    assert(os.path.exists(res[1]+"0"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
@@ -179,10 +179,10 @@ def test_vision_explain_loadmodel():
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0], type(fig)))
+    assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]))
+    assert(os.path.exists(res2[1]+"0"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
