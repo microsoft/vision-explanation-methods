@@ -68,7 +68,7 @@ def test_vision_explain_preloaded():
     assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"))
+    assert(os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
@@ -154,7 +154,7 @@ def test_vision_explain_loadmodel():
     assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"))
+    assert(os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
