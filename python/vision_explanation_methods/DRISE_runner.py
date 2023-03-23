@@ -17,10 +17,6 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 from .explanations import drise
 
-<<<<<<< HEAD
-
-def plot_img_bbox(ax: matplotlib.axes._subplots, box: numpy.ndarray,
-=======
 try:
     from matplotlib.axes._subplots import AxesSubplot
 except ImportError:
@@ -29,7 +25,6 @@ except ImportError:
 
 
 def plot_img_bbox(ax: AxesSubplot, box: numpy.ndarray,
->>>>>>> main
                   label: str, color: str):
     """Plot predicted bounding box and label on the D-RISE saliency map.
 
