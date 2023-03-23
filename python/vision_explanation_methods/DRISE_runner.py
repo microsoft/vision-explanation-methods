@@ -24,6 +24,9 @@ except ImportError:
     from matplotlib.axes import Subplot as AxesSubplot
 
 
+IMAGE_TYPE = ".jpg"
+
+
 def plot_img_bbox(ax: AxesSubplot, box: numpy.ndarray,
                   label: str, color: str):
     """Plot predicted bounding box and label on the D-RISE saliency map.
@@ -170,4 +173,4 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        fig.savefig(savename+str(i)+".jpg")
+        fig.savefig(savename+str(i)+IMAGE_TYPE)

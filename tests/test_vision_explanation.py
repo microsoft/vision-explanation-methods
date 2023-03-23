@@ -20,7 +20,7 @@ try:
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
     module_logger.debug('Could not import torchvision packages, required' +
-                        'if using a PyTorch model')
+                        'if using a PyTorch computer vision model')
 
 try:
     import torch
