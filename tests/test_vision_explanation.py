@@ -96,7 +96,7 @@ def test_vision_explain_preloaded():
     assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"))
+    assert(os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
@@ -104,7 +104,7 @@ def test_vision_explain_preloaded():
     print("Test1 passed for single detection")
 
     # delete files created during testing
-    for elt in [savepath, savepath2]:
+    for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
 
 
@@ -137,6 +137,7 @@ def test_vision_explain_loadmodel():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = _get_instance_segmentation_model(5)
     model.load_state_dict(torch.load(modelpath, device))
+    model.to(device)
 
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=PytorchDRiseWrapper(
@@ -181,7 +182,7 @@ def test_vision_explain_loadmodel():
     assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"))
+    assert(os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
@@ -189,5 +190,5 @@ def test_vision_explain_loadmodel():
     print("Test2 passed for single detection")
 
     # delete files created during testing
-    for elt in [savepath, savepath2, modelpath]:
+    for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
