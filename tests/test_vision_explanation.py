@@ -16,15 +16,11 @@ module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.INFO)
 
 try:
-    import torch
     import torchvision
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
-    module_logger.debug('Could not import torch packages, required' +
+    module_logger.debug('Could not import torchvision packages, required' +
                         'if using a PyTorch model')
-
-module_logger = logging.getLogger(__name__)
-module_logger.setLevel(logging.INFO)
 
 try:
     import torch
