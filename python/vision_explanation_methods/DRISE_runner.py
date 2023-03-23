@@ -113,9 +113,10 @@ def get_drise_saliency_map(
         device = devicechoice
 
     if not model:
-        model = PytorchDRiseWrapper(
-            detection.fasterrcnn_resnet50_fpn(pretrained=True,
-                                              map_location=device), numclasses)
+        unwrapped_model = detection.fasterrcnn_resnet50_fpn(
+            pretrained=True, map_location=device)
+        unwrapped_model.to(device)
+        model = PytorchDRiseWrapper(unwrapped_model, numclasses)
 
     test_image = Image.open(imagelocation).convert('RGB')
 
