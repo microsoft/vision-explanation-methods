@@ -158,7 +158,6 @@ def get_drise_saliency_map(
     label_list = []
     fig_list = []
     for i in range(num_detections):
-        fig = plt.figure()
         fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         label = int(torch.argmax(detections[img_index].class_scores[i]))
         label_list.append(label)

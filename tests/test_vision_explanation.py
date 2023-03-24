@@ -142,8 +142,8 @@ def test_vision_explain_loadmodel():
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=PytorchDRiseWrapper(
                                           model=model,
-                                          number_of_classes=91),
-                                    numclasses=91,
+                                          number_of_classes=87),
+                                    numclasses=87,
                                     savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
