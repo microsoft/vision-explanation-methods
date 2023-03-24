@@ -58,7 +58,8 @@ def test_vision_explain_preloaded():
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=None,
                                     numclasses=87,
-                                    savename=savepath)
+                                    savename=savepath,
+                                    max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -86,7 +87,8 @@ def test_vision_explain_preloaded():
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
                                      numclasses=87,
-                                     savename=savepath2)
+                                     savename=savepath2,
+                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
@@ -144,7 +146,8 @@ def test_vision_explain_loadmodel():
                                           model=model,
                                           number_of_classes=87),
                                     numclasses=87,
-                                    savename=savepath)
+                                    savename=savepath,
+                                    max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
@@ -172,7 +175,8 @@ def test_vision_explain_loadmodel():
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
                                      numclasses=87,
-                                     savename=savepath2)
+                                     savename=savepath2,
+                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)

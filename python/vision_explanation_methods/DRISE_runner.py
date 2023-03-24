@@ -84,7 +84,8 @@ def get_drise_saliency_map(
         nummasks: int = 250,
         maskres: Tuple[int, int] = (4, 4),
         maskpadding: Optional[int] = None,
-        devicechoice: Optional[str] = None
+        devicechoice: Optional[str] = None,
+        max_figures: Optional[int] = None
 ):
     """Run D-RISE on image and visualize the saliency maps.
 
@@ -103,6 +104,11 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
+    :param max_figures: The maximum number of figures this function
+        can create. This limit can be set if there are memory limitations.
+        Note that setting this parameter will potentially limit this function
+        from creating saliency maps for all objects. 
+    :type:Optional int
     :return: Tuple of Matplotlib figure list, path to where the output
         figure is saved, list of labels
     :rtype: Tuple of - list of Matplotlib figures, str, list
@@ -157,7 +163,8 @@ def get_drise_saliency_map(
 
     label_list = []
     fig_list = []
-    for i in range(num_detections):
+    for i in range((max_figures if num_detections > max_figures
+                    else num_detections)):
         fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         label = int(torch.argmax(detections[img_index].class_scores[i]))
         label_list.append(label)
