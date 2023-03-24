@@ -61,17 +61,13 @@ def test_vision_explain_preloaded():
                                     savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res) == 3)
-
-    # assert that first element in result is a figure.
-    fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0][0], type(fig)))
+    assert(len(res2) == 2)
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"+".jpg"))
+    assert(os.path.exists(res2[0]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res[2], list))
+    assert(isinstance(res2[1], list))
 
     print("Test1 passed for multiple detections")
 
@@ -89,17 +85,13 @@ def test_vision_explain_preloaded():
                                      savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res2) == 3)
-
-    # assert that first element in result is a figure.
-    fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0][0], type(fig)))
+    assert(len(res2) == 2)
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"+".jpg"))
+    assert(os.path.exists(res2[0]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res2[2], list))
+    assert(isinstance(res2[1], list))
 
     print("Test1 passed for single detection")
 
@@ -147,17 +139,13 @@ def test_vision_explain_loadmodel():
                                     savename=savepath)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res) == 3)
-
-    # assert that first element in result is a figure.
-    fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0][0], type(fig)))
+    assert(len(res) == 2)
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"+".jpg"))
+    assert(os.path.exists(res[0]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res[2], list))
+    assert(isinstance(res[1], list))
 
     print("Test2 passed for multiple detections")
 
@@ -175,17 +163,13 @@ def test_vision_explain_loadmodel():
                                      savename=savepath2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res2) == 3)
-
-    # assert that first element in result is a figure.
-    fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0][0], type(fig)))
+    assert(len(res2) == 2)
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"+".jpg"))
+    assert(os.path.exists(res2[0]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res2[2], list))
+    assert(isinstance(res2[1], list))
 
     print("Test2 passed for single detection")
 

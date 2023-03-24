@@ -178,4 +178,4 @@ def get_drise_saliency_map(
 
         fig.savefig(savename+str(i)+IMAGE_TYPE)
         fig_list.append(fig)
-    return fig_list, savename, label_list
+    return savename, label_list
