@@ -104,11 +104,8 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
-    :param max_figures: The maximum number of figures this function
-        can create. This limit can be set if there are memory limitations.
-        Note that setting this parameter will potentially limit this function
-        from creating saliency maps for all objects.
-    :type:Optional int
+    :param max_figures: max figure # if memory limitations.
+    :type: Optional int
     :return: Tuple of Matplotlib figure list, path to where the output
         figure is saved, list of labels
     :rtype: Tuple of - list of Matplotlib figures, str, list
