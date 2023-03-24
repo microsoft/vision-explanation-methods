@@ -16,12 +16,17 @@ module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.INFO)
 
 try:
-    import torch
     import torchvision
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
-    module_logger.debug('Could not import torch packages, required' +
-                        'if using a PyTorch model')
+    module_logger.debug('Could not import torchvision packages, required' +
+                        'if using a PyTorch computer vision model')
+
+try:
+    import torch
+except ImportError:
+    module_logger.debug('Could not import torch, required if using a' +
+                        'PyTorch model')
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
@@ -53,17 +58,18 @@ def test_vision_explain_preloaded():
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=None,
                                     numclasses=87,
-                                    savename=savepath)
+                                    savename=savepath,
+                                    max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0], type(fig)))
+    assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]))
+    assert(os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
@@ -81,17 +87,18 @@ def test_vision_explain_preloaded():
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
                                      numclasses=87,
-                                     savename=savepath2)
+                                     savename=savepath2,
+                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0], type(fig)))
+    assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]))
+    assert(os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
@@ -99,7 +106,7 @@ def test_vision_explain_preloaded():
     print("Test1 passed for single detection")
 
     # delete files created during testing
-    for elt in [savepath, savepath2]:
+    for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
 
 
@@ -137,19 +144,20 @@ def test_vision_explain_loadmodel():
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=PytorchDRiseWrapper(
                                           model=model,
-                                          number_of_classes=91),
-                                    numclasses=5,
-                                    savename=savepath)
+                                          number_of_classes=87),
+                                    numclasses=87,
+                                    savename=savepath,
+                                    max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0], type(fig)))
+    assert(isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]))
+    assert(os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res[2], list))
@@ -167,17 +175,18 @@ def test_vision_explain_loadmodel():
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
                                      numclasses=87,
-                                     savename=savepath2)
+                                     savename=savepath2,
+                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert(len(res2) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0], type(fig)))
+    assert(isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]))
+    assert(os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
     assert(isinstance(res2[2], list))
@@ -185,5 +194,5 @@ def test_vision_explain_loadmodel():
     print("Test2 passed for single detection")
 
     # delete files created during testing
-    for elt in [savepath, savepath2, modelpath]:
+    for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)

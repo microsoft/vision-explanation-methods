@@ -24,6 +24,9 @@ except ImportError:
     from matplotlib.axes import Subplot as AxesSubplot
 
 
+IMAGE_TYPE = ".jpg"
+
+
 def plot_img_bbox(ax: AxesSubplot, box: numpy.ndarray,
                   label: str, color: str):
     """Plot predicted bounding box and label on the D-RISE saliency map.
@@ -81,7 +84,8 @@ def get_drise_saliency_map(
         nummasks: int = 25,
         maskres: Tuple[int, int] = (4, 4),
         maskpadding: Optional[int] = None,
-        devicechoice: Optional[str] = None
+        devicechoice: Optional[str] = None,
+        max_figures: Optional[int] = None
 ):
     """Run D-RISE on image and visualize the saliency maps.
 
@@ -100,9 +104,11 @@ def get_drise_saliency_map(
     :type maskres: Tuple of ints
     :param maskpadding: How much to pad the mask before cropping
     :type: Optional int
-    :return: Tuple of Matplotlib figure, path to where the output
-        figure is saved
-    :rtype: Tuple of Matplotlib figure, str
+    :param max_figures: max figure # if memory limitations.
+    :type: Optional int
+    :return: Tuple of Matplotlib figure list, path to where the output
+        figure is saved, list of labels
+    :rtype: Tuple of - list of Matplotlib figures, str, list
     """
     if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -110,9 +116,10 @@ def get_drise_saliency_map(
         device = devicechoice
 
     if not model:
-        model = PytorchDRiseWrapper(
-            detection.fasterrcnn_resnet50_fpn(pretrained=True,
-                                              map_location=device), numclasses)
+        unwrapped_model = detection.fasterrcnn_resnet50_fpn(
+            pretrained=True, map_location=device)
+        unwrapped_model.to(device)
+        model = PytorchDRiseWrapper(unwrapped_model, numclasses)
 
     test_image = Image.open(imagelocation).convert('RGB')
 
@@ -151,22 +158,13 @@ def get_drise_saliency_map(
         fail = fail.save(savename)
         return None, None
 
-    fig, axis = plt.subplots(1, num_detections,
-                             figsize=(num_detections*10, 10))
-
     label_list = []
-    for i in range(num_detections):
-        box = detections[img_index].bounding_boxes[i].detach().numpy()
+    fig_list = []
+    for i in range((max_figures if num_detections > max_figures
+                    else num_detections)):
+        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         label = int(torch.argmax(detections[img_index].class_scores[i]))
         label_list.append(label)
-
-        # There is more than one element to display, hence multiple subplots
-        # Unclear why, but sometimes even with just one element,
-        # axis needs to be indexed
-        if num_detections > 1 or type(axis) == list:
-            ax = axis[i]
-        else:
-            ax = axis
 
         viz.visualize_image_attr(
             numpy.transpose(
@@ -182,10 +180,6 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        if num_detections > 1 or type(axis) == list:
-            axis[i] = plot_img_bbox(axis[i], box, str(label), 'r')
-        else:
-            axis = plot_img_bbox(axis, box, str(label), 'r')
-
-    fig.savefig(savename)
-    return fig, savename, label_list
+        fig.savefig(savename+str(i)+IMAGE_TYPE)
+        fig_list.append(fig)
+    return fig_list, savename, label_list
