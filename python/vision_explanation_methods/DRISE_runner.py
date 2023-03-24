@@ -81,7 +81,7 @@ def get_drise_saliency_map(
         model: Optional[object],
         numclasses: int,
         savename: str,
-        nummasks: int = 250,
+        nummasks: int = 25,
         maskres: Tuple[int, int] = (4, 4),
         maskpadding: Optional[int] = None,
         devicechoice: Optional[str] = None,
@@ -107,7 +107,7 @@ def get_drise_saliency_map(
     :param max_figures: The maximum number of figures this function
         can create. This limit can be set if there are memory limitations.
         Note that setting this parameter will potentially limit this function
-        from creating saliency maps for all objects. 
+        from creating saliency maps for all objects.
     :type:Optional int
     :return: Tuple of Matplotlib figure list, path to where the output
         figure is saved, list of labels
