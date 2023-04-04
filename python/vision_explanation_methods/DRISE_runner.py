@@ -124,12 +124,12 @@ def get_drise_saliency_map(
         model = PytorchDRiseWrapper(unwrapped_model, numclasses)
 
     image_open_pointer = imagelocation
-    if imagelocation.startswith("http://") or imagelocation.startswith("https://"):
+    if (imagelocation.startswith("http://")
+       or imagelocation.startswith("https://")):
         response = requests.get(imagelocation)
         image_open_pointer = BytesIO(response.content)
 
     test_image = Image.open(image_open_pointer).convert('RGB')
-
 
     detections = model.predict(
         T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
