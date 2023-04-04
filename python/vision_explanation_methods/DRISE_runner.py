@@ -1,12 +1,13 @@
 """Method for generating saliency maps for object detection models."""
 
-from io import BytesIO
 import os
+from io import BytesIO
 from typing import Optional, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
+import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
@@ -15,7 +16,6 @@ from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-import requests
 
 from .explanations import drise
 
