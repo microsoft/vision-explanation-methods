@@ -1,5 +1,6 @@
 """Method for generating saliency maps for object detection models."""
 
+from io import BytesIO
 import os
 from typing import Optional, Tuple
 
@@ -14,6 +15,7 @@ from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+import requests
 
 from .explanations import drise
 
@@ -121,7 +123,13 @@ def get_drise_saliency_map(
         unwrapped_model.to(device)
         model = PytorchDRiseWrapper(unwrapped_model, numclasses)
 
-    test_image = Image.open(imagelocation).convert('RGB')
+    image_open_pointer = imagelocation
+    if imagelocation.startswith("http://") or imagelocation.startswith("https://"):
+        response = requests.get(imagelocation)
+        image_open_pointer = BytesIO(response.content)
+
+    test_image = Image.open(image_open_pointer).convert('RGB')
+
 
     detections = model.predict(
         T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
