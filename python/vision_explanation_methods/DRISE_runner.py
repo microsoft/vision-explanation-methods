@@ -3,6 +3,7 @@
 import os
 from io import BytesIO
 from typing import Optional, Tuple
+import base64
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -112,7 +113,9 @@ def get_drise_saliency_map(
         figure is saved, list of labels
     :rtype: Tuple of - list of Matplotlib figures, str, list
     """
-    if not devicechoice:
+
+
+if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
         device = devicechoice
@@ -130,14 +133,27 @@ def get_drise_saliency_map(
         image_open_pointer = BytesIO(response.content)
 
     test_image = Image.open(image_open_pointer).convert('RGB')
+    
+    if not isinstance(model, MLflowDRiseWrapper):
+        img_input = T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device)
+    else:
+        img_size = test_image.size
+        imgio = BytesIO()
+        test_image.save(imgio, format='JPEG')
+        img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
+        img_input = pd.DataFrame(
+            data=[[img_str, img_size]],
+            columns=['image', "image_size"],
+                    )
 
-    detections = model.predict(
-        T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
-
+    # detections = model.predict(
+    #     T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
+    detections = model.predict(img_input)
+    print("Here 2")
     saliency_scores = drise.DRISE_saliency(
         model=model,
         # Repeated the tensor to test batching
-        image_tensor=T.ToTensor()(test_image).repeat(2, 1, 1, 1).to(device),
+        image_tensor=img_input,
         target_detections=detections,
         # This is how many masks to run -
         # more is slower but gives higher quality mask.
