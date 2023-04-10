@@ -4,6 +4,7 @@ import os
 from io import BytesIO
 from typing import Optional, Tuple
 import base64
+import pandas as pd
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -12,7 +13,8 @@ import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
+# from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
+from responsibleai_vision.ml_wrappers_new.python.ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper, MLflowDRiseWrapper
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
@@ -115,7 +117,7 @@ def get_drise_saliency_map(
     """
 
 
-if not devicechoice:
+    if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
         device = devicechoice
