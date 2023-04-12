@@ -127,8 +127,8 @@ def compute_affinity_scores(
     :rtype: Tensor of shape D, where D is number of base detections
     """
     score_matrix = compute_affinity_matrix(base_detections, masked_detections)
-    if not (score_matrix.numel()):
-        return torch.empty((1, 1), dtype=torch.int64)
+    # if not (score_matrix.numel()):
+    #     return torch.empty((1, 1), dtype=torch.int64)
     return torch.max(score_matrix, dim=1)[0]
 
 
