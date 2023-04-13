@@ -162,7 +162,7 @@ def get_drise_saliency_map(
     if num_detections == 0:  # If no objects have been detected...
         fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
-        return None, None
+        return None, None, None
 
     label_list = []
     fig_list = []
