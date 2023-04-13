@@ -1,6 +1,5 @@
 """Method for generating saliency maps for object detection models."""
 
-import os
 from io import BytesIO
 from typing import Optional, Tuple
 import base64
@@ -116,7 +115,6 @@ def get_drise_saliency_map(
     :rtype: Tuple of - list of Matplotlib figures, str, list
     """
 
-
     if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:
@@ -135,9 +133,9 @@ def get_drise_saliency_map(
         image_open_pointer = BytesIO(response.content)
 
     test_image = Image.open(image_open_pointer).convert('RGB')
-    
+
     if not isinstance(model, MLflowDRiseWrapper):
-        img_input = T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device)
+        img_input = T.ToTensor()(test_image).unsqueeze(0).to(device)
     else:
         img_size = test_image.size
         imgio = BytesIO()
@@ -146,7 +144,7 @@ def get_drise_saliency_map(
         img_input = pd.DataFrame(
             data=[[img_str, img_size]],
             columns=['image', "image_size"],
-                    )
+        )
 
     # detections = model.predict(
     #     T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
@@ -179,10 +177,9 @@ def get_drise_saliency_map(
     num_detections = len(saliency_scores)
 
     if num_detections == 0:  # If no objects have been detected...
-        fail = Image.open(os.path.join("python", "vision_explanation_methods",
-                                       "images", "notfound.jpg"))
+        fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
-        return None, None
+        return None, None, None
 
     label_list = []
     fig_list = []
