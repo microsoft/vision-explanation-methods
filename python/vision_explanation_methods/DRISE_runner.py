@@ -1,6 +1,5 @@
 """Method for generating saliency maps for object detection models."""
 
-import os
 from io import BytesIO
 from typing import Optional, Tuple
 
