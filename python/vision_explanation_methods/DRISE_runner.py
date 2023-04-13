@@ -1,6 +1,5 @@
 """Method for generating saliency maps for object detection models."""
 
-import os
 from io import BytesIO
 from typing import Optional, Tuple
 
@@ -132,12 +131,12 @@ def get_drise_saliency_map(
     test_image = Image.open(image_open_pointer).convert('RGB')
 
     detections = model.predict(
-        T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
+        T.ToTensor()(test_image).unsqueeze(0).to(device))
 
     saliency_scores = drise.DRISE_saliency(
         model=model,
         # Repeated the tensor to test batching
-        image_tensor=T.ToTensor()(test_image).repeat(2, 1, 1, 1).to(device),
+        image_tensor=T.ToTensor()(test_image).unsqueeze(0).to(device),
         target_detections=detections,
         # This is how many masks to run -
         # more is slower but gives higher quality mask.
@@ -161,10 +160,9 @@ def get_drise_saliency_map(
     num_detections = len(saliency_scores)
 
     if num_detections == 0:  # If no objects have been detected...
-        fail = Image.open(os.path.join("python", "vision_explanation_methods",
-                                       "images", "notfound.jpg"))
+        fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
-        return None, None
+        return None, None, None
 
     label_list = []
     fig_list = []
