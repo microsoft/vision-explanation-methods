@@ -12,8 +12,9 @@ import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-# from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
-from responsibleai_vision.ml_wrappers_new.python.ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper, MLflowDRiseWrapper
+from ml_wrappers.model.image_model_wrapper import (PytorchDRiseWrapper,
+                                                   MLflowDRiseWrapper)
+
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
@@ -134,9 +135,7 @@ def get_drise_saliency_map(
 
     test_image = Image.open(image_open_pointer).convert('RGB')
 
-    if not isinstance(model, MLflowDRiseWrapper):
-        img_input = T.ToTensor()(test_image).unsqueeze(0).to(device)
-    else:
+    if isinstance(model, MLflowDRiseWrapper):
         img_size = test_image.size
         imgio = BytesIO()
         test_image.save(imgio, format='JPEG')
@@ -146,25 +145,57 @@ def get_drise_saliency_map(
             columns=['image', "image_size"],
         )
 
-    # detections = model.predict(
-    #     T.ToTensor()(test_image).unsqueeze(0).repeat(2, 1, 1, 1).to(device))
-    detections = model.predict(img_input)
-    print("Here 2")
-    saliency_scores = drise.DRISE_saliency(
-        model=model,
-        # Repeated the tensor to test batching
-        image_tensor=img_input,
-        target_detections=detections,
-        # This is how many masks to run -
-        # more is slower but gives higher quality mask.
-        number_of_masks=nummasks,
-        mask_padding=maskpadding,
-        device=device,
-        # This is the resolution of the random masks.
-        # High resolutions will give finer masks, but more need to be run.
-        mask_res=maskres,
-        verbose=True  # Turns progress bar on/off.
-    )
+        detections = model.predict(img_input)
+        # saliency_scores = drise.DRISE_saliency(
+        #     model=model,
+        #     # Repeated the tensor to test batching
+        #     image_tensor=T.ToTensor()(test_image).unsqueeze(0).to(device),
+        #     target_detections=detections,
+        #     # This is how many masks to run -
+        #     # more is slower but gives higher quality mask.
+        #     number_of_masks=nummasks,
+        #     mask_padding=maskpadding,
+        #     device=device,
+        #     # This is the resolution of the random masks.
+        #     # High resolutions will give finer masks, but more need to be run.
+        #     mask_res=maskres,
+        #     verbose=True  # Turns progress bar on/off.
+        # )
+        saliency_scores = drise.DRISE_saliency_for_mlflow(
+            model=model,
+            # Repeated the tensor to test batching
+            image_tensor=img_input,
+            target_detections=detections,
+            # This is how many masks to run -
+            # more is slower but gives higher quality mask.
+            number_of_masks=nummasks,
+            mask_padding=maskpadding,
+            device=device,
+            # This is the resolution of the random masks.
+            # High resolutions will give finer masks, but more need to be run.
+            mask_res=maskres,
+            verbose=True  # Turns progress bar on/off.
+        )
+    else:
+        img_input = T.ToTensor()(test_image).unsqueeze(0).to(device)
+
+        detections = model.predict(img_input)
+
+        saliency_scores = drise.DRISE_saliency(
+            model=model,
+            # Repeated the tensor to test batching
+            image_tensor=img_input,
+            target_detections=detections,
+            # This is how many masks to run -
+            # more is slower but gives higher quality mask.
+            number_of_masks=nummasks,
+            mask_padding=maskpadding,
+            device=device,
+            # This is the resolution of the random masks.
+            # High resolutions will give finer masks, but more need to be run.
+            mask_res=maskres,
+            verbose=True  # Turns progress bar on/off.
+        )
 
     img_index = 0
 
