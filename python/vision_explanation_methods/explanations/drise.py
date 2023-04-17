@@ -244,8 +244,6 @@ def DRISE_saliency(
     for _ in mask_iterator:
 
         mask = generate_mask(mask_res, img_size, mask_padding)
-        print(f'mask shape is {mask.size()}')
-        print(f'image shape is {image_tensor.size()}')
         masked_image = fuse_mask(image_tensor.to(device), mask.to(device))
         with torch.no_grad():
             masked_detections = model.predict(masked_image)
@@ -321,8 +319,6 @@ def DRISE_saliency_for_mlflow(
         # TODO: Currently only supports single image. Add support for multiple
         img_tens = convert_base64_to_tensor(
             image_tensor.loc[0, 'image'], mask.size())
-        print(f'mlflow mask shape is {mask.size()}')
-        print(f'mlflow image shape is {img_tens.size()}')
 
         masked_image = fuse_mask(img_tens.to(device), mask.to(device))
         masked_image_str, masked_image_size = convert_tensor_to_base64(
@@ -339,6 +335,8 @@ def DRISE_saliency_for_mlflow(
 
         for (target_detection, masked_detection) in zip(target_detections,
                                                         masked_detections):
+            print("PRINTING masked detection")
+            print(masked_detection)
             affinity_scores.append(
                 compute_affinity_scores(target_detection, masked_detection))
 

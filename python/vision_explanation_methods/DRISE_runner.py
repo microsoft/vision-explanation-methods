@@ -198,13 +198,15 @@ def get_drise_saliency_map(
         )
 
     img_index = 0
-
+    print("PRINTING SALIENCY SCORES BEFORE")
+    print(saliency_scores)
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
                        if not torch.isnan(
                        saliency_scores[img_index][i]['detection']).any()]
-
+    print("PRINTING SALIENCY SCORES AFTER")
+    print(saliency_scores)
     num_detections = len(saliency_scores)
 
     if num_detections == 0:  # If no objects have been detected...
