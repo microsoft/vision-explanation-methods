@@ -146,21 +146,7 @@ def get_drise_saliency_map(
         )
 
         detections = model.predict(img_input)
-        # saliency_scores = drise.DRISE_saliency(
-        #     model=model,
-        #     # Repeated the tensor to test batching
-        #     image_tensor=T.ToTensor()(test_image).unsqueeze(0).to(device),
-        #     target_detections=detections,
-        #     # This is how many masks to run -
-        #     # more is slower but gives higher quality mask.
-        #     number_of_masks=nummasks,
-        #     mask_padding=maskpadding,
-        #     device=device,
-        #     # This is the resolution of the random masks.
-        #     # High resolutions will give finer masks, but more need to be run.
-        #     mask_res=maskres,
-        #     verbose=True  # Turns progress bar on/off.
-        # )
+
         saliency_scores = drise.DRISE_saliency_for_mlflow(
             model=model,
             # Repeated the tensor to test batching
