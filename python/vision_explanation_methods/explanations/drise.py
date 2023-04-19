@@ -8,18 +8,18 @@ A black box explainability method for object detection.
 """
 
 import base64
-import io
-from io import BytesIO
-import pandas as pd
 import copy
+import io
 from dataclasses import dataclass
+from io import BytesIO
 from typing import List, Optional, Tuple
 
+import pandas as pd
 import PIL.Image as Image
 import torch
-from torch import Tensor
 import torchvision.transforms as T
 import tqdm
+from torch import Tensor
 
 from .common import (DetectionRecord, GeneralObjectDetectionModelWrapper,
                      compute_affinity_matrix)

@@ -1,20 +1,19 @@
 """Method for generating saliency maps for object detection models."""
 
+import base64
 from io import BytesIO
 from typing import Optional, Tuple
-import base64
-import pandas as pd
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
+import pandas as pd
 import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import (PytorchDRiseWrapper,
-                                                   MLflowDRiseWrapper)
-
+from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapper,
+                                                   PytorchDRiseWrapper)
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
@@ -198,12 +197,7 @@ def get_drise_saliency_map(
         )
 
     img_index = 0
-    print("PRINTING SALIENCY SCORES BEFORE")
-    print(saliency_scores)
-    if len(saliency_scores) == 0:
-        fail = Image.new('RGB', (100, 100))
-        fail = fail.save(savename)
-        return None, None, None
+
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
@@ -238,7 +232,6 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        # fig.savefig(savename+str(i)+IMAGE_TYPE)
-        fig.savefig(savename)
+        fig.savefig(savename+str(i)+IMAGE_TYPE)
         fig_list.append(fig)
     return fig_list, savename, label_list
