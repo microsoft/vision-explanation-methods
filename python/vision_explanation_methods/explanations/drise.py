@@ -7,8 +7,6 @@
 A black box explainability method for object detection.
 """
 
-import math
-import torch.nn.functional as F
 import base64
 import io
 from io import BytesIO
@@ -103,21 +101,6 @@ def generate_mask(
     return T.RandomCrop(img_size)(resized_mask)
 
 
-# def generate_mask(grid_size, image_size, prob_thresh=0.5):
-#     image_w, image_h = image_size
-#     grid_w, grid_h = grid_size
-#     cell_w, cell_h = math.ceil(image_w / grid_w), math.ceil(image_h / grid_h)
-#     up_w, up_h = (grid_w + 1) * cell_w, (grid_h + 1) * cell_h
-
-#     mask = (torch.rand((3, grid_h, grid_w)) < prob_thresh).float()
-#     mask = torch.stack([F.interpolate(mask[i].unsqueeze(0).unsqueeze(
-#         0), size=(up_h, up_w), mode='bilinear').squeeze() for i in range(3)])
-#     offset_w = torch.randint(0, cell_w, (1,))
-#     offset_h = torch.randint(0, cell_h, (1,))
-#     mask = mask[:, offset_h:offset_h + image_h, offset_w:offset_w + image_w]
-#     return mask
-
-
 def fuse_mask(
         img_tensor: torch.Tensor,
         mask: torch.Tensor
@@ -148,12 +131,7 @@ def compute_affinity_scores(
     :rtype: Tensor of shape D, where D is number of base detections
     """
     score_matrix = compute_affinity_matrix(base_detections, masked_detections)
-    print("PRINTING AFFINITY SCORES MATRIX")
-    print(score_matrix)
-    max_val = torch.max(score_matrix, dim=1)[0]
-    print("PRINTING MAX VAL")
-    print(max_val)
-    return max_val
+    return torch.max(score_matrix, dim=1)[0]
 
 
 def saliency_fusion(
@@ -284,6 +262,37 @@ def DRISE_saliency(
     return saliency_fusion(mask_records, verbose=verbose)
 
 
+def convert_base64_to_tensor(b64_img: str) -> Tensor:
+    """Convert base64 image to tensor.
+
+    :param b64_img: Base64 encoded image
+    :type b64_img: str
+    :return: Image tensor
+    :rtype: Tensor
+    """
+
+    base64_decoded = base64.b64decode(b64_img)
+    image = Image.open(io.BytesIO(base64_decoded))
+    img_tens = T.ToTensor()(image)
+    return img_tens
+
+
+def convert_tensor_to_base64(img_tens: Tensor) -> Tuple[str, Tuple[int, int]]:
+    """Convert image tensor to base64 string.
+
+    :param img_tens: Image tensor
+    :type img_tens: Tensor
+    :return: Base64 encoded image
+    :rtype: str
+    """
+
+    img_pil = T.ToPILImage()(img_tens)
+    imgio = BytesIO()
+    img_pil.save(imgio, format='PNG')
+    img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
+    return img_str, img_pil.size
+
+
 def DRISE_saliency_for_mlflow(
         model,
         image_tensor: pd.DataFrame,
@@ -314,15 +323,16 @@ def DRISE_saliency_for_mlflow(
         associated with detection i.
     :rtype: List torch.Tensor
     """
-    # TODO: change these to try-except
-    assert isinstance(image_tensor, pd.DataFrame),\
-        "TypeError: Image needs to be a torch.Tensor or pd.DataFrame"
-    assert image_tensor.shape[0] == 1,\
-        "Currently only one image supported for AutoML mlflow models"
+
+    if not isinstance(image_tensor, pd.DataFrame):
+        raise ValueError(
+            "TypeError: Image needs to be a torch.Tensor or pd.DataFrame")
+    if not image_tensor.shape[0] == 1:
+        raise ValueError(
+            "Currently only one image supported for AutoML mlflow model")
 
     img_size = image_tensor.loc[0, 'image_size']
 
-    # shape of image size is y,x whereas
     if mask_padding is None:
         mask_padding = int(max(
             img_size[0] / mask_res[0], img_size[1] / mask_res[1]))
@@ -332,66 +342,31 @@ def DRISE_saliency_for_mlflow(
     mask_iterator = tqdm.tqdm(range(number_of_masks)) if verbose \
         else range(number_of_masks)
 
-    for i in mask_iterator:
+    for _ in mask_iterator:
         # Converts image base64 to a tensor
         # Fuses mask tensor with image tensor
         # Converts fused image tensor to base64
         mask = generate_mask(mask_res, img_size, mask_padding)
-        # print("PRINTING MASK SHAPE")
-        # print(mask.shape)
+
         # Currently only supports single image
         img_tens = convert_base64_to_tensor(
             image_tensor.loc[0, 'image'])
-        # print("PRINTING IMAGE TENSOR SHAPE")
-        # print(img_tens.shape)
-        # print("PRINTING IF ALL ELEMS IN MASK ARE 0")
-        # print((mask).sum().item() < 1)
-        # mask = mask.reshape(img_tens.shape)
-        # print("PRINTING MASK ReSHAPED")
-        # print(mask.shape)
-        # print("PRINTING IMAGE TENSOR - AFTER B64 to TENS")
-        # print(img_tens)
-        if i == 0:
-            image = T.ToPILImage()(img_tens)
-            image.save(f'img_tens_{i}.png')
+
         masked_image = fuse_mask(img_tens.to(device), mask.to(device))
-        if i == 0:
-            image = T.ToPILImage()(masked_image)
-            image.save(f'masked_image_{i}.png')
-        # print("PRINTING MASKED IMAGE - AFTER FUSING")
-        # print(masked_image)
 
         masked_image_str, masked_image_size = convert_tensor_to_base64(
             masked_image)
-
-        # print("PRINTING MASKED IMAGE - AFTER TENS to B64")
-        # print(masked_image_str)
 
         masked_df = pd.DataFrame(
             data=[[masked_image_str, masked_image_size]],
             columns=['image', "image_size"],
         )
 
-        print("PRINTING MASKED DF")
-        print(masked_df)
-
         masked_detections = model.predict(masked_df)
-        # print("PRINTING MASKED DETECTIONS")
-        # for x in masked_detections:
-        #     print("BBOXs")
-        #     print(x.bounding_boxes)
-        #     print("SCORES")
-        #     print(x.class_scores)
 
         affinity_scores = []
         for (target_detection, masked_detection) in zip(target_detections,
                                                         masked_detections):
-            # When I leave this in, saliency scores before the nan check
-            # are already empty
-            if masked_detection is None:
-                # continue
-                print("MASKED DETECTION IS NONE")
-
             affinity_scores.append(
                 compute_affinity_scores(target_detection, masked_detection))
 
@@ -400,52 +375,3 @@ def DRISE_saliency_for_mlflow(
             affinity_scores=[s.detach().to("cpu") for s in affinity_scores])
         )
     return saliency_fusion(mask_records, verbose=verbose)
-
-
-def convert_base64_to_tensor(b64_img: str) -> Tensor:
-    """Convert base64 image to tensor.
-
-    :param b64_img: Base64 encoded image
-    :type b64_img: str
-    :return: Image tensor
-    :rtype: Tensor
-    """
-
-    base64_decoded = base64.b64decode(b64_img)
-    image = Image.open(io.BytesIO(base64_decoded))
-    img_tens = T.ToTensor()(image)
-    return img_tens
-
-    # # Decode the base64 string back to a NumPy array
-    # decoded = np.frombuffer(base64.b64decode(b64_img), dtype=np.float32)
-    # # array_back = decoded.reshape(array.shape)
-    # array_back = decoded.reshape(mask_size)
-
-    # # Convert the NumPy array back to a PyTorch tensor
-    # tensor_back = torch.from_numpy(array_back)
-    # return tensor_back
-
-
-def convert_tensor_to_base64(img_tens: Tensor) -> Tuple[str, Tuple[int, int]]:
-    """Convert image tensor to base64 string.
-
-    :param img_tens: Image tensor
-    :type img_tens: Tensor
-    :return: Base64 encoded image
-    :rtype: str
-    """
-
-    img_pil = T.ToPILImage()(img_tens)
-    # img_pil = Image.fromarray(
-    #     img_tens.cpu().numpy().astype('uint8'), mode='RGB')
-    imgio = BytesIO()
-    img_pil.save(imgio, format='PNG')
-    img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
-    return img_str, img_pil.size
-
-    # # Convert the tensor to a NumPy array
-    # array = img_tens.numpy()
-
-    # # Encode the NumPy array as a base64 string
-    # encoded = base64.b64encode(array.tobytes()).decode('utf-8')
-    # return encoded, array.shape[-2:]
