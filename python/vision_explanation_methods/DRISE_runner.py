@@ -136,12 +136,12 @@ def get_drise_saliency_map(
     test_image = Image.open(image_open_pointer).convert('RGB')
 
     if isinstance(model, MLflowDRiseWrapper):
-        img_size = test_image.size
+        x, y = test_image.size
         imgio = BytesIO()
-        test_image.save(imgio, format='JPEG')
+        test_image.save(imgio, format='PNG')
         img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
         img_input = pd.DataFrame(
-            data=[[img_str, img_size]],
+            data=[[img_str, (y, x)]],
             columns=['image', "image_size"],
         )
 
@@ -186,16 +186,18 @@ def get_drise_saliency_map(
     img_index = 0
     print("PRINTING SALIENCY SCORES BEFORE")
     print(saliency_scores)
+    if len(saliency_scores) == 0:
+        fail = Image.new('RGB', (100, 100))
+        fail = fail.save(savename)
+        return None, None, None
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
                        if not torch.isnan(
                        saliency_scores[img_index][i]['detection']).any()]
-    print("PRINTING SALIENCY SCORES AFTER")
-    print(saliency_scores)
-    num_detections = len(saliency_scores)
 
-    if num_detections == 0:  # If no objects have been detected...
+    num_detections = len(saliency_scores)
+    if num_detections == 0:
         fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
         return None, None, None
@@ -222,6 +224,7 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        fig.savefig(savename+str(i)+IMAGE_TYPE)
+        # fig.savefig(savename+str(i)+IMAGE_TYPE)
+        fig.savefig(savename)
         fig_list.append(fig)
     return fig_list, savename, label_list

@@ -192,8 +192,6 @@ def compute_affinity_matrix(
     :rtype: Tensor
     """
     # No detections in the masked image
-    print("PRINTING DETECTIONS B in COMMON.py")
-    print(detections_b)
     if detections_b is None:
         return torch.zeros((1, detections_a.bounding_boxes.shape[0]))
 
