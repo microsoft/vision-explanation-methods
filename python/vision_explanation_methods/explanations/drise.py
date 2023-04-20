@@ -361,14 +361,19 @@ def DRISE_saliency_for_mlflow(
 
         masked_detections = model.predict(masked_df)
 
-        affinity_scores = []
-        for (target_detection, masked_detection) in zip(target_detections,
-                                                        masked_detections):
-            affinity_scores.append(
-                compute_affinity_scores(target_detection, masked_detection))
+        affinity_scores = [
+            compute_affinity_scores(target_detection, masked_detection)
+            for (target_detection, masked_detection)
+            in zip(target_detections, masked_detections)
+        ]
+        # affinity_scores = []
+        # for (target_detection, masked_detection) in zip(target_detections,
+        #                                                 masked_detections):
+        #     affinity_scores.append(
+        #         compute_affinity_scores(target_detection, masked_detection))
 
         mask_records.append(MaskAffinityRecord(
-            mask=mask.to("cpu"),
-            affinity_scores=[s.detach().to("cpu") for s in affinity_scores])
+            mask=mask.detach().cpu(),
+            affinity_scores=[s.detach().cpu() for s in affinity_scores])
         )
     return saliency_fusion(mask_records, verbose=verbose)
