@@ -114,7 +114,6 @@ def get_drise_saliency_map(
         figure is saved, list of labels
     :rtype: Tuple of - list of Matplotlib figures, str, list
     """
-
     if not devicechoice:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     else:

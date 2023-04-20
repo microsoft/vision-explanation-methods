@@ -270,7 +270,6 @@ def convert_base64_to_tensor(b64_img: str) -> Tensor:
     :return: Image tensor
     :rtype: Tensor
     """
-
     base64_decoded = base64.b64decode(b64_img)
     image = Image.open(io.BytesIO(base64_decoded))
     img_tens = T.ToTensor()(image)
@@ -285,7 +284,6 @@ def convert_tensor_to_base64(img_tens: Tensor) -> Tuple[str, Tuple[int, int]]:
     :return: Base64 encoded image
     :rtype: str
     """
-
     img_pil = T.ToPILImage()(img_tens)
     imgio = BytesIO()
     img_pil.save(imgio, format='PNG')
@@ -303,7 +301,7 @@ def DRISE_saliency_for_mlflow(
         device: str = "cpu",
         verbose: bool = False,
 ) -> List[torch.Tensor]:
-    """Compute DRISE saliency map
+    """Compute DRISE saliency map.
 
     :param model: Object detection model wrapped for occlusion
     :type model: OcclusionModelWrapper
@@ -323,7 +321,6 @@ def DRISE_saliency_for_mlflow(
         associated with detection i.
     :rtype: List torch.Tensor
     """
-
     if not isinstance(image_tensor, pd.DataFrame):
         raise ValueError(
             "TypeError: Image needs to be a torch.Tensor or pd.DataFrame")

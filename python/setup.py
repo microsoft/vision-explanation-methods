@@ -42,7 +42,8 @@ DEPENDENCIES = [
     # TODO: remove this dependency
     'matplotlib<3.7.0',
     # 'ml_wrappers'
-    'https://publictestdatasets.blob.core.windows.net/packages/pypi/ml-wrappers/ml_wrappers-0.4.18-py3-none-any.whl'
+    'https://publictestdatasets.blob.core.windows.net/packages/pypi/'\
+    + 'ml-wrappers/ml_wrappers-0.4.18-py3-none-any.whl'
 ]
 
 with open(README_FILE, 'r', encoding='utf-8') as f:
