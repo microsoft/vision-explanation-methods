@@ -121,7 +121,7 @@ def get_drise_saliency_map(
 
     if not model:
         unwrapped_model = detection.fasterrcnn_resnet50_fpn(
-            pretrained=True)
+            pretrained=True, map_location=device)
         unwrapped_model.to(device)
         model = PytorchDRiseWrapper(unwrapped_model, numclasses)
 
@@ -181,18 +181,18 @@ def get_drise_saliency_map(
         )
 
     img_index = 0
-
+    print(saliency_scores)
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
                        if not torch.isnan(
                        saliency_scores[img_index][i]['detection']).any()]
-
+    print(saliency_scores)
     num_detections = len(saliency_scores)
     if num_detections == 0:
         fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
-        return None, None, None
+        # return None, None, None
 
     label_list = []
     fig_list = []
