@@ -366,11 +366,6 @@ def DRISE_saliency_for_mlflow(
             for (target_detection, masked_detection)
             in zip(target_detections, masked_detections)
         ]
-        # affinity_scores = []
-        # for (target_detection, masked_detection) in zip(target_detections,
-        #                                                 masked_detections):
-        #     affinity_scores.append(
-        #         compute_affinity_scores(target_detection, masked_detection))
 
         mask_records.append(MaskAffinityRecord(
             mask=mask.detach().cpu(),
