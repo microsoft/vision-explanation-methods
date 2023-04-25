@@ -7,15 +7,19 @@
 A black box explainability method for object detection.
 """
 
-
+import base64
 import copy
+import io
 from dataclasses import dataclass
+from io import BytesIO
 from typing import List, Optional, Tuple
 
+import pandas as pd
 import PIL.Image as Image
 import torch
 import torchvision.transforms as T
 import tqdm
+from torch import Tensor
 
 from .common import (DetectionRecord, GeneralObjectDetectionModelWrapper,
                      compute_affinity_matrix)
@@ -127,7 +131,6 @@ def compute_affinity_scores(
     :rtype: Tensor of shape D, where D is number of base detections
     """
     score_matrix = compute_affinity_matrix(base_detections, masked_detections)
-
     return torch.max(score_matrix, dim=1)[0]
 
 
@@ -168,8 +171,8 @@ def saliency_fusion(
                 weighted_mask_accum += weighted_mask
 
             for average_score_accum, affinity_score in zip(
-                                                        average_scores_accum,
-                                                        affinity_scores):
+                    average_scores_accum,
+                    affinity_scores):
                 average_score_accum += affinity_score
         except RuntimeError:
             continue
@@ -181,7 +184,7 @@ def saliency_fusion(
         for average_score, weighted_mask in zip(average_scores_accum,
                                                 weighted_masks_accum):
             weighted_mask -= average_score.unsqueeze(1).unsqueeze(1). \
-                            unsqueeze(1) * unweighted_mask_accum
+                unsqueeze(1) * unweighted_mask_accum
 
     normalized_masks = []
 
@@ -198,7 +201,7 @@ def saliency_fusion(
 
 def DRISE_saliency(
         model: GeneralObjectDetectionModelWrapper,
-        image_tensor: torch.Tensor,
+        image_tensor: Tensor,
         target_detections: List[DetectionRecord],
         number_of_masks: int,
         mask_res: Tuple[int, int] = (16, 16),
@@ -256,4 +259,116 @@ def DRISE_saliency(
             affinity_scores=[s.detach().to("cpu") for s in affinity_scores])
         )
 
+    return saliency_fusion(mask_records, verbose=verbose)
+
+
+def convert_base64_to_tensor(b64_img: str) -> Tensor:
+    """Convert base64 image to tensor.
+
+    :param b64_img: Base64 encoded image
+    :type b64_img: str
+    :return: Image tensor
+    :rtype: Tensor
+    """
+    base64_decoded = base64.b64decode(b64_img)
+    image = Image.open(io.BytesIO(base64_decoded))
+    img_tens = T.ToTensor()(image)
+    return img_tens
+
+
+def convert_tensor_to_base64(img_tens: Tensor) -> Tuple[str, Tuple[int, int]]:
+    """Convert image tensor to base64 string.
+
+    :param img_tens: Image tensor
+    :type img_tens: Tensor
+    :return: Base64 encoded image
+    :rtype: str
+    """
+    img_pil = T.ToPILImage()(img_tens)
+    imgio = BytesIO()
+    img_pil.save(imgio, format='PNG')
+    img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
+    return img_str, img_pil.size
+
+
+def DRISE_saliency_for_mlflow(
+        model,
+        image_tensor: pd.DataFrame,
+        target_detections: List[DetectionRecord],
+        number_of_masks: int,
+        mask_res: Tuple[int, int] = (16, 16),
+        mask_padding: Optional[int] = None,
+        device: str = "cpu",
+        verbose: bool = False,
+) -> List[torch.Tensor]:
+    """Compute DRISE saliency map.
+
+    :param model: Object detection model wrapped for occlusion
+    :type model: OcclusionModelWrapper
+    :param target_detections: Baseline detections to get saliency
+        maps for
+    :type target_detections: List of Detection Records
+    :param number_of_masks: Number of masks to use for saliency
+    :type number_of_masks: int
+    :param mask_res: Resolution of mask before scale up
+    :type maks_res: Tuple of ints
+    :param mask_padding: How much to pad the mask before cropping
+    :type: Optional int
+    :device: Device to use to run the function
+    :type: str
+    :return: A list of tensors, one tensor for each image. Each tensor
+        is of shape [D, 3, W, H], and [i ,3 W, H] is the saliency map
+        associated with detection i.
+    :rtype: List torch.Tensor
+    """
+    if not isinstance(image_tensor, pd.DataFrame):
+        raise ValueError(
+            "TypeError: Image needs to be a torch.Tensor or pd.DataFrame")
+    if not image_tensor.shape[0] == 1:
+        raise ValueError(
+            "Currently only one image supported for AutoML mlflow model")
+
+    img_size = image_tensor.loc[0, 'image_size']
+
+    if mask_padding is None:
+        mask_padding = int(max(
+            img_size[0] / mask_res[0], img_size[1] / mask_res[1]))
+
+    mask_records = []
+
+    mask_iterator = tqdm.tqdm(range(number_of_masks)) if verbose \
+        else range(number_of_masks)
+
+    for _ in mask_iterator:
+        # Converts image base64 to a tensor
+        # Fuses mask tensor with image tensor
+        # Converts fused image tensor to base64
+        mask = generate_mask(mask_res, img_size, mask_padding)
+
+        # Currently only supports single image
+        img_tens = convert_base64_to_tensor(
+            image_tensor.loc[0, 'image'])
+
+        masked_image = fuse_mask(img_tens.to(device), mask.to(device))
+
+        masked_image_str, masked_image_size = convert_tensor_to_base64(
+            masked_image)
+
+        masked_df = pd.DataFrame(
+            data=[[masked_image_str, masked_image_size]],
+            columns=['image', "image_size"],
+        )
+
+        masked_detections = model.predict(masked_df)
+
+        affinity_scores = [
+            compute_affinity_scores(target_detection, masked_detection)
+            for (target_detection, masked_detection)
+            in zip(target_detections, masked_detections)
+        ]
+
+        mask_records.append(MaskAffinityRecord(
+            mask=mask.detach().cpu(),
+            affinity_scores=[s.detach().cpu() for s in affinity_scores])
+        )
     return saliency_fusion(mask_records, verbose=verbose)

@@ -253,6 +253,6 @@ def expand_class_scores(
 
         residual = (1. - score.item()) / (number_of_classes)
         expanded_scores[i, :] *= residual
-        expanded_scores[i, label.item()] = score
+        expanded_scores[i, int(label.item())] = score
 
     return expanded_scores
