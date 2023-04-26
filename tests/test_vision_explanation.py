@@ -175,7 +175,7 @@ def test_vision_explain_loadmodel():
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=PytorchDRiseWrapper(
                                           model=model,
-                                          number_of_classes=87),
+                                          number_of_classes=5),
                                      numclasses=5,
                                      savename=savepath2,
                                      max_figures=2)
