@@ -173,8 +173,10 @@ def test_vision_explain_loadmodel():
     # run the main function for saliency map generation
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
-                                     model=None,
-                                     numclasses=90,
+                                     model=PytorchDRiseWrapper(
+                                          model=model,
+                                          number_of_classes=5),
+                                     numclasses=5,
                                      savename=savepath2,
                                      max_figures=2)
 
