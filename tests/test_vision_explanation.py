@@ -57,22 +57,22 @@ def test_vision_explain_preloaded():
     # run the main function for saliency map generation
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=None,
-                                    numclasses=87,
+                                    numclasses=90,
                                     savename=savepath,
                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res) == 3)
+    assert (len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0][0], type(fig)))
+    assert (isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"+".jpg"))
+    assert (os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res[2], list))
+    assert (isinstance(res[2], list))
 
     print("Test1 passed for multiple detections")
 
@@ -86,22 +86,22 @@ def test_vision_explain_preloaded():
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
                                      model=None,
-                                     numclasses=87,
+                                     numclasses=90,
                                      savename=savepath2,
                                      max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res2) == 3)
+    assert (len(res2) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0][0], type(fig)))
+    assert (isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"+".jpg"))
+    assert (os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res2[2], list))
+    assert (isinstance(res2[2], list))
 
     print("Test1 passed for single detection")
 
@@ -143,24 +143,24 @@ def test_vision_explain_loadmodel():
 
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
                                     model=PytorchDRiseWrapper(
-                                          model=model,
-                                          number_of_classes=87),
-                                    numclasses=87,
+                                        model=model,
+                                        number_of_classes=5),
+                                    numclasses=5,
                                     savename=savepath,
                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res) == 3)
+    assert (len(res) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res[0][0], type(fig)))
+    assert (isinstance(res[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res[1]+"0"+".jpg"))
+    assert (os.path.exists(res[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res[2], list))
+    assert (isinstance(res[2], list))
 
     print("Test2 passed for multiple detections")
 
@@ -176,22 +176,22 @@ def test_vision_explain_loadmodel():
                                      model=PytorchDRiseWrapper(
                                           model=model,
                                           number_of_classes=87),
-                                     numclasses=87,
+                                     numclasses=5, 
                                      savename=savepath2,
                                      max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
-    assert(len(res2) == 3)
+    assert (len(res2) == 3)
 
     # assert that first element in result is a figure.
     fig, axis = plt.subplots(2, 2)
-    assert(isinstance(res2[0][0], type(fig)))
+    assert (isinstance(res2[0][0], type(fig)))
 
     # assert that figure has been saved in proper location.
-    assert(os.path.exists(res2[1]+"0"+".jpg"))
+    assert (os.path.exists(res2[1]+"0"+".jpg"))
 
     # assert that labels returned are in a list.
-    assert(isinstance(res2[2], list))
+    assert (isinstance(res2[2], list))
 
     print("Test2 passed for single detection")
 
