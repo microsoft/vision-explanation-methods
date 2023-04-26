@@ -176,7 +176,7 @@ def test_vision_explain_loadmodel():
                                      model=PytorchDRiseWrapper(
                                           model=model,
                                           number_of_classes=87),
-                                     numclasses=5, 
+                                     numclasses=5,
                                      savename=savepath2,
                                      max_figures=2)
 
