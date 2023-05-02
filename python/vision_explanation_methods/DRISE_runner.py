@@ -137,9 +137,6 @@ def get_drise_saliency_map(
 
     test_image = Image.open(image_open_pointer).convert('RGB')
 
-    detections = model.predict(
-        T.ToTensor()(test_image).unsqueeze(0).to(device))
-
     print("detections_vision expl methods")
     print(detections)
     print("img_vision expl methods")
@@ -195,6 +192,8 @@ def get_drise_saliency_map(
 
     img_index = 0
 
+    print(saliency_scores)
+
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
@@ -205,9 +204,7 @@ def get_drise_saliency_map(
     num_detections = len(saliency_scores)
     if num_detections == 0:
         print("No detections found. Saving empty figure.")
-        fail = Image.new('RGB', (100, 100))
-        fail = fail.save(savename)
-        return None, None, None
+        raise ValueError()
 
     label_list = []
     fig_list = []
@@ -232,19 +229,11 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        fig.savefig(savename+str(i)+IMAGE_TYPE)
-        fig.clear()
-
-        # for debugging
-        # flike = io.BytesIO()
-        # fig.savefig(flike)
-        # b64 = base64.b64encode(flike.getvalue()).decode()
-        # print(b64)
-
-        image = get_image_from_path(savename+str(i) + ".jpg", "RGB")
-        jpg_img = cv2.imencode('.jpg', image)
-        b64_string = base64.b64encode(jpg_img[1]).decode('utf-8')
-        print("vizexplmethods str: " + b64_string)
+        stream = io.BytesIO()
+        plt.savefig(stream, format='jpg')
+        stream.seek(0)
+        b64_string = base64.b64encode(stream.read()).decode()
         fig_list.append(b64_string)
+        fig.clear()
 
     return fig_list, savename, label_list
