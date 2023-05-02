@@ -172,6 +172,8 @@ def get_drise_saliency_map(
 
         detections = model.predict(img_input)
 
+        print(str(detections))
+        
         saliency_scores = drise.DRISE_saliency(
             model=model,
             # Repeated the tensor to test batching
