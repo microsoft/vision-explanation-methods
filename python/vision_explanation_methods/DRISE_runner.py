@@ -139,7 +139,7 @@ def get_drise_saliency_map(
 
     detections = model.predict(
         T.ToTensor()(test_image).unsqueeze(0).to(device))
-    
+
     print("detections_vision expl methods")
     print(detections)
     print("img_vision expl methods")
