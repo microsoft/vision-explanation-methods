@@ -64,7 +64,7 @@ def test_vision_explain_preloaded():
     assert (len(res) == 3)
 
     # assert that first element in result is a string
-    assert (isinstance(res[0][0], type(str)))
+    assert (isinstance(res[0][0], str))
 
     # assert that figure has been saved in proper location.
     assert (os.path.exists(res[1]+"0"+".jpg"))
@@ -92,7 +92,7 @@ def test_vision_explain_preloaded():
     assert (len(res2) == 3)
 
     # assert that first element in result is a string
-    assert (isinstance(res2[0][0], type(str)))
+    assert (isinstance(res2[0][0], str))
 
     # assert that figure has been saved in proper location.
     assert (os.path.exists(res2[1]+"0"+".jpg"))
@@ -150,7 +150,7 @@ def test_vision_explain_loadmodel():
     assert (len(res) == 3)
 
     # assert that first element in result is a string
-    assert (isinstance(res[0][0], type(str)))
+    assert (isinstance(res[0][0], str))
 
     # assert that figure has been saved in proper location.
     assert (os.path.exists(res[1]+"0"+".jpg"))
@@ -180,7 +180,7 @@ def test_vision_explain_loadmodel():
     assert (len(res2) == 3)
 
     # assert that first element in result is a string
-    assert (isinstance(res2[0][0], type(str)))
+    assert (isinstance(res2[0][0], str))
 
     # assert that figure has been saved in proper location.
     assert (os.path.exists(res2[1]+"0"+".jpg"))
