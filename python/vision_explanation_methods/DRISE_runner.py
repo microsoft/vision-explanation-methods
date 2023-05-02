@@ -4,9 +4,6 @@ import base64
 from io import BytesIO
 from typing import Optional, Tuple
 
-import cv2
-import io
-import base64
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
@@ -21,7 +18,6 @@ from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from responsibleai_vision.utils.image_reader import get_image_from_path
 
 from .explanations import drise
 
@@ -137,8 +133,6 @@ def get_drise_saliency_map(
 
     test_image = Image.open(image_open_pointer).convert('RGB')
 
-    print("detections_vision expl methods")
-    print(detections)
     print("img_vision expl methods")
     print(str(test_image))
     if isinstance(model, MLflowDRiseWrapper):
@@ -173,7 +167,7 @@ def get_drise_saliency_map(
         detections = model.predict(img_input)
 
         print(str(detections))
-        
+
         saliency_scores = drise.DRISE_saliency(
             model=model,
             # Repeated the tensor to test batching
@@ -231,7 +225,7 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
-        stream = io.BytesIO()
+        stream = BytesIO()
         plt.savefig(stream, format='jpg')
         stream.seek(0)
         b64_string = base64.b64encode(stream.read()).decode()
