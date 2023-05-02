@@ -196,6 +196,7 @@ def get_drise_saliency_map(
                        if not torch.isnan(
                        saliency_scores[img_index][i]['detection']).any()]
     print("filtered")
+    print(saliency_scores)
 
     num_detections = len(saliency_scores)
     if num_detections == 0:
