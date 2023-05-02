@@ -1,5 +1,6 @@
 """Method for generating saliency maps for object detection models."""
 
+import base64
 from io import BytesIO
 from typing import Optional, Tuple
 
@@ -9,11 +10,13 @@ import base64
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
+import pandas as pd
 import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
+from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapper,
+                                                   PytorchDRiseWrapper)
 from PIL import Image
 from torchvision import transforms as T
 from torchvision.models import detection
@@ -141,22 +144,52 @@ def get_drise_saliency_map(
     print(detections)
     print("img_vision expl methods")
     print(str(test_image))
+    if isinstance(model, MLflowDRiseWrapper):
+        x, y = test_image.size
+        imgio = BytesIO()
+        test_image.save(imgio, format='PNG')
+        img_str = base64.b64encode(imgio.getvalue()).decode('utf8')
+        img_input = pd.DataFrame(
+            data=[[img_str, (y, x)]],
+            columns=['image', 'image_size'],
+        )
 
-    saliency_scores = drise.DRISE_saliency(
-        model=model,
-        # Repeated the tensor to test batching
-        image_tensor=T.ToTensor()(test_image).unsqueeze(0).to(device),
-        target_detections=detections,
-        # This is how many masks to run -
-        # more is slower but gives higher quality mask.
-        number_of_masks=nummasks,
-        mask_padding=maskpadding,
-        device=device,
-        # This is the resolution of the random masks.
-        # High resolutions will give finer masks, but more need to be run.
-        mask_res=maskres,
-        verbose=True  # Turns progress bar on/off.
-    )
+        detections = model.predict(img_input)
+        saliency_scores = drise.DRISE_saliency_for_mlflow(
+            model=model,
+            # Repeated the tensor to test batching
+            image_tensor=img_input,
+            target_detections=detections,
+            # This is how many masks to run -
+            # more is slower but gives higher quality mask.
+            number_of_masks=nummasks,
+            mask_padding=maskpadding,
+            device=device,
+            # This is the resolution of the random masks.
+            # High resolutions will give finer masks, but more need to be run.
+            mask_res=maskres,
+            verbose=True  # Turns progress bar on/off.
+        )
+    else:
+        img_input = T.ToTensor()(test_image).unsqueeze(0).to(device)
+
+        detections = model.predict(img_input)
+
+        saliency_scores = drise.DRISE_saliency(
+            model=model,
+            # Repeated the tensor to test batching
+            image_tensor=img_input,
+            target_detections=detections,
+            # This is how many masks to run -
+            # more is slower but gives higher quality mask.
+            number_of_masks=nummasks,
+            mask_padding=maskpadding,
+            device=device,
+            # This is the resolution of the random masks.
+            # High resolutions will give finer masks, but more need to be run.
+            mask_res=maskres,
+            verbose=True  # Turns progress bar on/off.
+        )
 
     print("calculated saliency scores")
 
@@ -170,9 +203,8 @@ def get_drise_saliency_map(
     print("filtered")
 
     num_detections = len(saliency_scores)
-
-    if num_detections == 0:  # If no objects have been detected...
-        print("no images found")
+    if num_detections == 0:
+        print("No detections found. Saving empty figure.")
         fail = Image.new('RGB', (100, 100))
         fail = fail.save(savename)
         return None, None, None
