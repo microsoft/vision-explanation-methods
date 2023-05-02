@@ -219,6 +219,7 @@ def get_drise_saliency_map(
         stream.seek(0)
         b64_string = base64.b64encode(stream.read()).decode()
         fig_list.append(b64_string)
+        fig.savefig(savename+str(i)+IMAGE_TYPE)
         fig.clear()
 
     return fig_list, savename, label_list
