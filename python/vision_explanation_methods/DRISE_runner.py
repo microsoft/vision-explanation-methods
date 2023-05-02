@@ -133,8 +133,6 @@ def get_drise_saliency_map(
 
     test_image = Image.open(image_open_pointer).convert('RGB')
 
-    print("img_vision expl methods")
-    print(str(test_image))
     if isinstance(model, MLflowDRiseWrapper):
         x, y = test_image.size
         imgio = BytesIO()
@@ -166,8 +164,6 @@ def get_drise_saliency_map(
 
         detections = model.predict(img_input)
 
-        print(str(detections))
-
         saliency_scores = drise.DRISE_saliency(
             model=model,
             # Repeated the tensor to test batching
@@ -184,30 +180,22 @@ def get_drise_saliency_map(
             verbose=True  # Turns progress bar on/off.
         )
 
-    print("calculated saliency scores")
-
     img_index = 0
-
-    print(saliency_scores)
 
     # Filter out saliency scores containing nan values
     saliency_scores = [saliency_scores[img_index][i]
                        for i in range(len(saliency_scores[img_index]))
                        if not torch.isnan(
                        saliency_scores[img_index][i]['detection']).any()]
-    print("filtered")
-    print(saliency_scores)
 
     num_detections = len(saliency_scores)
     if num_detections == 0:
-        print("No detections found. Saving empty figure.")
         raise ValueError()
 
     label_list = []
     fig_list = []
     for i in range((max_figures if num_detections > max_figures
                     else num_detections)):
-        print("entering loop")
         fig, ax = plt.subplots(1, 1, figsize=(10, 10))
         label = int(torch.argmax(detections[img_index].class_scores[i]))
         label_list.append(label)
