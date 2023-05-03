@@ -190,10 +190,7 @@ def get_drise_saliency_map(
 
     num_detections = len(saliency_scores)
     if num_detections == 0:
-        print("No detections found. Saving empty figure.")
-        fail = Image.new('RGB', (100, 100))
-        fail = fail.save(savename)
-        return None, None, None
+        raise ValueError("No detections found")
 
     label_list = []
     fig_list = []
@@ -217,7 +214,12 @@ def get_drise_saliency_map(
             use_pyplot=False
         )
 
+        stream = BytesIO()
+        plt.savefig(stream, format='jpg')
+        stream.seek(0)
+        b64_string = base64.b64encode(stream.read()).decode()
+        fig_list.append(b64_string)
         fig.savefig(savename+str(i)+IMAGE_TYPE)
         fig.clear()
-        fig_list.append(fig)
+
     return fig_list, savename, label_list
