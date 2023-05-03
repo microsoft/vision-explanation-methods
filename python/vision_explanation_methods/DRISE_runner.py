@@ -12,7 +12,7 @@ import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapFper,
+from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapper,
                                                    PytorchDRiseWrapper)
 from PIL import Image
 from torchvision import transforms as T
