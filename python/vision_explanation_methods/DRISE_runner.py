@@ -12,7 +12,7 @@ import requests
 import torch
 import torchvision
 from captum.attr import visualization as viz
-from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapper,
+from ml_wrappers.model.image_model_wrapper import (MLflowDRiseWrapFper,
                                                    PytorchDRiseWrapper)
 from PIL import Image
 from torchvision import transforms as T
@@ -190,7 +190,7 @@ def get_drise_saliency_map(
 
     num_detections = len(saliency_scores)
     if num_detections == 0:
-        raise ValueError()
+        raise ValueError("No detections found")
 
     label_list = []
     fig_list = []
