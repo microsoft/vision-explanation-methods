@@ -4,7 +4,6 @@
 import numpy as np
 import pytest
 
-from responsibleai_vision import ModelTask
 from vision_explanation_methods.error_labeling.error_labeling import (
     ErrorLabelType, ErrorLabeling)
 
@@ -105,7 +104,7 @@ class TestErrorLabelingManager(object):
                                              true_y,
                                              iou_threshold,
                                              result):
-        task_type = ModelTask.OBJECT_DETECTION
+        task_type = 'object_detection'
         mng = ErrorLabeling(task_type,
                             pred_y,
                             true_y,
