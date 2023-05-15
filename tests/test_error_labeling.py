@@ -48,7 +48,7 @@ class TestErrorLabelingManager(object):
         ([[1, 162, 65, 1000, 1000, 0]],
          [[2, 162, 65, 1000, 200, 0]],
          .5,
-         np.array([ErrorLabelType.BOTH])),
+         np.array([ErrorLabelType.CLASS_LOCALIZATION])),
 
         # duplicate detection,
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 660, 0]],

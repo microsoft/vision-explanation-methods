@@ -24,6 +24,7 @@ class ErrorLabelType(Enum):
     MISSING = "missing"
 
     # the model predicted detections, but there was nothing there
+    # this prediction must have a 0 iou score with all gt detections
     BACKGROUND = "background"
 
     # the predicted class is correct, bounding box is not
@@ -33,7 +34,7 @@ class ErrorLabelType(Enum):
     CLASS_NAME = "class_name"
 
     # both the predicted class and bounding box are incorrect
-    BOTH = "both"
+    CLASS_LOCALIZATION = "class_localization"
 
     # the predicted class is correct, the bounding box is correct, but
     # the iou score is lower than another detection
@@ -130,7 +131,7 @@ class ErrorLabeling():
                     if detect[0] != gt[0]:
                         # the bb's don't line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = (
-                            ErrorLabelType.BOTH)
+                            ErrorLabelType.CLASS_LOCALIZATION)
                         continue
                     else:
                         self._match_matrix[gt_index][detect_index] = (
