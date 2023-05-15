@@ -108,6 +108,12 @@ class TestErrorLabelingManager(object):
          [[0, 1, 1, 20, 20, 0]],
          .5,
          np.array([None])),
+
+        # edge case for background error (bb's touch, but iou is 0)
+        ([[44, 5, 5, 1, 1, 0]],
+         [[44, 6, 6, 1, 1, 0]],
+         .5,
+         np.array([ErrorLabelType.BACKGROUND])),
     ])
     def test_object_detection_image_labeling(self,
                                              pred_y,
@@ -122,8 +128,3 @@ class TestErrorLabelingManager(object):
                             iou_threshold)
         mng.compute()
         assert (mng._match_matrix == result).all()
-
-
-# TestErrorLabeling().test_object_detection_image_labeling(
-# [[1, 50, 50, 100, 100, 0]],
-#  [[1, 350, 350, 100, 100, 0]],.5,[None, None])
