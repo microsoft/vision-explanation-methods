@@ -3,11 +3,11 @@
 
 """Defines the Error Labeling Manager class."""
 
-import torchvision
-from torch import Tensor
+from enum import Enum
 
 import numpy as np
-from enum import Enum
+import torchvision
+from torch import Tensor
 
 LABELS = 'labels'
 

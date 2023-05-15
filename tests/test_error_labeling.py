@@ -5,9 +5,8 @@
 
 import numpy as np
 import pytest
-
 from vision_explanation_methods.error_labeling.error_labeling import (
-    ErrorLabelType, ErrorLabeling)
+    ErrorLabeling, ErrorLabelType)
 
 
 class TestErrorLabelingManager(object):
