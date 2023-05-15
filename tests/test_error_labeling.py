@@ -34,6 +34,13 @@ class TestErrorLabelingManager(object):
          [np.array([ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH]),
           np.array([ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND])]),
 
+        # missing detection
+        ([[44, 5, 5, 7, 7, 0]],
+         [[44, 1, 1, 2, 2, 0], [44, 5, 5, 7, 7, 0]],
+         .5,
+         [np.array([ErrorLabelType.BACKGROUND]),
+          np.array([ErrorLabelType.MATCH])]),
+
         # correct instance, prediction not = but w/in iou threshold
         ([[44, 162, 65, 365, 660, 0]],
          [[44, 162, 65, 365, 670, 0]],
@@ -127,4 +134,5 @@ class TestErrorLabelingManager(object):
                             true_y,
                             iou_threshold)
         mng.compute()
+        print(mng._match_matrix)
         assert (mng._match_matrix == result).all()

@@ -89,6 +89,9 @@ class ErrorLabeling():
     def compute(self, **kwargs):
         """Compute the error analysis data.
 
+        Note: if a row does not have a match, that means that there is a
+        missing gt detection
+
         :param kwargs: The keyword arguments to pass to the compute method.
             Note that this method does not take any arguments currently.
         :type kwargs: dict
