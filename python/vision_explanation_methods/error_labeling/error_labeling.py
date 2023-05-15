@@ -94,39 +94,34 @@ class ErrorLabeling():
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
         for gt_index, gt in enumerate(self._true_y):
+            print((self._match_matrix))
             for detect_index, detect in enumerate(sorted_list):
                 iou_score = torchvision.ops.box_iou(
                     Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
                     Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
                 if iou_score.item() == 0.0:
                     self._match_matrix[gt_index][detect_index] = ErrorLabelType.BACKGROUND
-                    self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                     continue
                 if (self._iou_threshold <= iou_score):
                     # the detection and ground truth bb's must be overlapping
                     if detect[0] != gt[0]:
                         # the bb's line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = ErrorLabelType.CLASS_NAME
-                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                         continue
                     elif (ErrorLabelType.MATCH in
                           self._match_matrix[gt_index]):
                         self._match_matrix[gt_index][detect_index] = ErrorLabelType.DUPLICATE_DETECTION
-                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                         continue
                     else:
                         # this means bbs overlap, class names = (1st time)
                         self._match_matrix[gt_index][detect_index] = ErrorLabelType.MATCH
-                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                         continue
                 else:
                     if detect[0] != gt[0]:
                         # the bb's don't line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = ErrorLabelType.BOTH
-                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                         continue
                     else:
                         self._match_matrix[gt_index][detect_index] = ErrorLabelType.LOCALIZATION
-                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
                         continue
-        print((self._match_matrix))
+            self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
