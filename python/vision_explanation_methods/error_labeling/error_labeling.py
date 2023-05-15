@@ -93,25 +93,28 @@ class ErrorLabeling():
             Note that this method does not take any arguments currently.
         :type kwargs: dict
         """
+        # save original ordering of predictions
         original_indices = [i for i, _ in sorted(enumerate(self._pred_y),
                                                  key=lambda x: x[1][-1],
                                                  reverse=True)]
 
         # sort predictions by decreasing conf score
+        # this is to stay consistent with NMS and MAP algorithms
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
         for gt_index, gt in enumerate(self._true_y):
-            print((self._match_matrix))
             for detect_index, detect in enumerate(sorted_list):
                 iou_score = torchvision.ops.box_iou(
                     Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
                     Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
+
                 if iou_score.item() == 0.0:
+                    # if iou is 0, then prediction is detecting the background
                     self._match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
                     continue
                 if (self._iou_threshold <= iou_score):
-                    # the detection and ground truth bb's must be overlapping
+                    # the detection and ground truth bb's are overlapping
                     if detect[0] != gt[0]:
                         # the bb's line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = (
@@ -119,6 +122,10 @@ class ErrorLabeling():
                         continue
                     elif (ErrorLabelType.MATCH in
                           self._match_matrix[gt_index]):
+                        # class name and bb correct, but there is already a
+                        # match with a higher confidence score (this is why
+                        # it was imporant to sort by descending confidence
+                        # scores as the first step)
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.DUPLICATE_DETECTION)
                         continue
@@ -129,13 +136,17 @@ class ErrorLabeling():
                         continue
                 else:
                     if detect[0] != gt[0]:
-                        # the bb's don't line up, but labels do not
+                        # the bb's don't line up, and labels do not
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_LOCALIZATION)
                         continue
                     else:
+                        # the bb's don't line up, but the labels are correct
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.LOCALIZATION)
                         continue
+
+            # resort the columns (so no longer ordered by descending conf
+            # scores)
             self._match_matrix[gt_index] = [self._match_matrix[gt_index][i]
                                             for i in original_indices]

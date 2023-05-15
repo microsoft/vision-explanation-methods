@@ -26,6 +26,14 @@ class TestErrorLabelingManager(object):
          [np.array([ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND]),
           np.array([ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH])]),
 
+        # correct instance, predictions exactly the same for multiple detects
+        # order is mixed up
+        ([[44, 5, 5, 7, 7, 0], [44, 1, 1, 2, 2, 0]],
+         [[44, 1, 1, 2, 2, 0], [44, 5, 5, 7, 7, 0]],
+         .5,
+         [np.array([ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH]),
+          np.array([ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND])]),
+
         # correct instance, prediction not = but w/in iou threshold
         ([[44, 162, 65, 365, 660, 0]],
          [[44, 162, 65, 365, 670, 0]],
@@ -44,7 +52,7 @@ class TestErrorLabelingManager(object):
          .5,
          np.array([ErrorLabelType.CLASS_NAME])),
 
-        # complete miss, minor overlap with original ,
+        # complete miss, minor overlap with original (less than iou)
         ([[1, 162, 65, 1000, 1000, 0]],
          [[2, 162, 65, 1000, 200, 0]],
          .5,
@@ -64,7 +72,7 @@ class TestErrorLabelingManager(object):
          np.array([ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION])),
 
         # duplicate detection, detections not identical but w/in iou range.
-        # Detection with lower iou has diff conf score
+        # Detection with lower iou has higher conf score
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 50]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
