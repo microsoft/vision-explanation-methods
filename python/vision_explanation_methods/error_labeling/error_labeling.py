@@ -19,6 +19,7 @@ class ErrorLabelType(Enum):
     If none, then the detection is not an error. It is a
     correct prediction.
     """
+
     # the gt doesn't have a corresponding detection
     MISSING = "missing"
 
@@ -45,12 +46,13 @@ class ErrorLabeling():
     """Defines a wrapper class of Error Labeling for vision scenario.
     Only supported for object detection at this point.
     """
+
     def __init__(self,
                  task_type: str,
                  pred_y: str,
                  true_y: str,
                  iou_threshold: float = 0.5):
-        """Creates an ErrorLabeling object.
+        """Create an ErrorLabeling object.
 
         :param model: The model to explain.
             A model that implements sklearn.predict or sklearn.predict_proba

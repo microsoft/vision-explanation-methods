@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft Corporation
 # Licensed under the MIT License.
 
+"""Test error labeling in the vision-explanation-methods package."""
+
 import numpy as np
 import pytest
 
@@ -9,8 +11,11 @@ from vision_explanation_methods.error_labeling.error_labeling import (
 
 
 class TestErrorLabelingManager(object):
+    """
+    Testing error_labeling.py
+    """
 
-    @pytest.mark.parametrize("pred_y, true_y, iou_threshold, result", [
+    @pytest.mark.parametrize(("pred_y, true_y, iou_threshold, result"), [
         # correct instance, prediction exactly the same
         ([[44, 162, 65, 365, 660, 0]],
          [[44, 162, 65, 365, 660, 0]],
@@ -104,6 +109,9 @@ class TestErrorLabelingManager(object):
                                              true_y,
                                              iou_threshold,
                                              result):
+        """
+        Compare _match_matrix attribute to expected result
+        """
         task_type = 'object_detection'
         mng = ErrorLabeling(task_type,
                             pred_y,
