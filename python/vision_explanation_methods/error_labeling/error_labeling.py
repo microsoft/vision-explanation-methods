@@ -3,47 +3,10 @@
 
 """Defines the Error Labeling Manager class."""
 
-import cv2
-import base64
-import io
-import json
-import pickle
-import warnings
-from pathlib import Path
-from typing import Any, List, Optional
-import torch
-import torchmetrics
-import torchmetrics.functional as metrics
 import torchvision
 from torch import Tensor
 
-import matplotlib.pyplot as pl
 import numpy as np
-import pandas as pd
-import shap
-from ml_wrappers import wrap_model
-from responsibleai._interfaces import ModelExplanationData
-from responsibleai._internal.constants import ExplainerManagerKeys as Keys
-from responsibleai._internal.constants import (ListProperties, ManagerNames,
-                                               Metadata)
-from responsibleai._tools.shared.state_directory_management import \
-    DirectoryManager
-from responsibleai.exceptions import UserConfigValidationException
-from responsibleai.managers.base_manager import BaseManager
-from responsibleai_vision.common.constants import (CommonTags,
-                                                   ExplainabilityDefaults,
-                                                   ExplainabilityLiterals,
-                                                   MLFlowSchemaLiterals,
-                                                   ModelTask,
-                                                   XAIPredictionLiterals)
-from responsibleai_vision.utils.image_reader import (
-    get_base64_string_from_path, get_image_from_path, is_automl_image_model)
-from shap.plots import colors
-from shap.utils._legacy import kmeans
-from vision_explanation_methods.DRISE_runner import get_drise_saliency_map
-from ml_wrappers.model.image_model_wrapper import (PytorchDRiseWrapper,
-                                                   MLflowDRiseWrapper)
-from PIL import Image, ImageDraw, ImageFont
 from enum import Enum
 
 LABELS = 'labels'
@@ -78,7 +41,7 @@ class ErrorLabelType(Enum):
     MATCH = "match"
 
 
-class ErrorLabeling(BaseManager):
+class ErrorLabeling():
     """Defines a wrapper class of Error Labeling for vision scenario.
     Only supported for object detection at this point.
     """
@@ -116,8 +79,7 @@ class ErrorLabeling(BaseManager):
         self._pred_y = pred_y
         self._true_y = true_y
         self._iou_threshold = iou_threshold
-
-        self._match_matrix = [[None for i in range(len(pred_y))] for i in range(len(true_y))]
+        self._match_matrix = np.full((len(self._true_y), len(self._pred_y)), None)
 
     def compute(self, **kwargs):
         """Compute the error analysis data.
@@ -126,48 +88,45 @@ class ErrorLabeling(BaseManager):
             Note that this method does not take any arguments currently.
         :type kwargs: dict
         """
-        if not self._is_added:
-            self.add()
+        original_indices = [i for i, _ in sorted(enumerate(self._pred_y), key=lambda x: x[1][-1], reverse=True)]
 
-        for detect_index in range(len(self._pred_y)):
-            detect = self._pred_y[detect_index]
-            matched = False
-            background = True
-            for gt_index in range(len(self._true_y)):
-                gt = self._true_y[gt_index]
-                iou_score = torchvision.ops.box_iou(Tensor(detect[1:5]).unsqueeze(0),
-                                                    Tensor(gt[1:5]).unsqueeze(0))
-                if iou_score > 0:
-                    background = False
+        # sort predictions by decreasing conf score
+        sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
+
+        for gt_index, gt in enumerate(self._true_y):
+            for detect_index, detect in enumerate(sorted_list):
+                iou_score = torchvision.ops.box_iou(
+                    Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
+                    Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
+                if iou_score.item() == 0.0:
+                    self._match_matrix[gt_index][detect_index] = ErrorLabelType.BACKGROUND
+                    self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                    continue
                 if (self._iou_threshold <= iou_score):
                     # the detection and ground truth bb's must be overlapping
                     if detect[0] != gt[0]:
                         # the bb's line up, but labels do not
-                        matched = True
-                        self._prediction_error_labels[detect_index] = ErrorLabelType.CLASS_NAME
-                    elif (gt_is_matched[gt_index] is not None):
-                        # todo - check if should use conf score or iou score
-                        if gt_is_matched[gt_index][0] <= iou_score:
-                            # reset previously correct match
-                            # todo - fix this so choose one w higher conf score to be consistent w MAP and NMS algorithsm 
-                            matched = True 
-                            prev_correct_match_index = gt_is_matched[gt_index][1]
-                            gt_is_matched[prev_correct_match_index] = -1 # todo check this
-                            gt_is_matched[gt_index] = (iou_score, detect_index)
-                            self._prediction_error_labels[detect_index] = ErrorLabelType.DUPLICATE_DETECTION
+                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.CLASS_NAME
+                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                        continue
+                    elif (ErrorLabelType.MATCH in
+                          self._match_matrix[gt_index]):
+                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.DUPLICATE_DETECTION
+                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                        continue
                     else:
                         # this means bbs overlap, class names = (1st time)
-                        matched = True
-                        gt_is_matched[gt_index] = (iou_score, detect_index)
-                        break
-            if not matched:
-                if background:
-                    self._prediction_error_labels[detect_index] = ErrorLabelType.BACKGROUND
+                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.MATCH
+                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                        continue
                 else:
-                    # if detect[0] 
-                    self._prediction_error_labels[detect_index] = ErrorLabelType.BOTH
-
-        for gt_index in range(len(self._true_y)):
-            gt = self._true_y[gt_index]
-            if gt is None:
-                self._missing_labels[gt_index] = ErrorLabelType.MISSING
+                    if detect[0] != gt[0]:
+                        # the bb's don't line up, but labels do not
+                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.BOTH
+                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                        continue
+                    else:
+                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.LOCALIZATION
+                        self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+                        continue
+        print((self._match_matrix))

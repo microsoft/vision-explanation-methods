@@ -1,99 +1,117 @@
 # Copyright (c) Microsoft Corporation
 # Licensed under the MIT License.
 
+import numpy as np
 import pytest
 
 from responsibleai_vision import ModelTask
-from vision_explanation_methods.error_labeling import (
+from vision_explanation_methods.error_labeling.error_labeling import (
     ErrorLabelType, ErrorLabeling)
 
 
 class TestErrorLabelingManager(object):
 
-    @pytest.mark.parametrize("pred_y, true_y, iou_threshold, result, result_missing", [
+    @pytest.mark.parametrize("pred_y, true_y, iou_threshold, result", [
         # correct instance, prediction exactly the same
         ([[44, 162, 65, 365, 660, 0]],
          [[44, 162, 65, 365, 660, 0]],
          .5,
-         [None],
-         [None]),
+         np.array([ErrorLabelType.MATCH])),
 
         # correct instance, predictions exactly the same for multiple detects
-        ([[44, 162, 65, 365, 660, 0], [44, 1, 4, 7, 10, 0]],
-         [[44, 162, 65, 365, 660, 0], [44, 1, 4, 7, 10, 0]],
+        ([[44, 5, 5, 7, 7, 0], [44, 1, 1, 2, 2, 0]],
+         [[44, 5, 5, 7, 7, 0], [44, 1, 1, 2, 2, 0]],
          .5,
-         [None, None],
-         [None, None]),
+         [np.array([ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND]),
+          np.array([ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH])]),
 
         # correct instance, prediction not = but w/in iou threshold
         ([[44, 162, 65, 365, 660, 0]],
          [[44, 162, 65, 365, 670, 0]],
          .5,
-         [None],
-         [None]),
+         np.array([ErrorLabelType.MATCH])),
 
-        # class error
+        # class error with 100% overlap
         ([[44, 162, 65, 365, 660, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         [ErrorLabelType.CLASS_NAME],
-         [None]),
+         np.array([ErrorLabelType.CLASS_NAME])),
 
-        # complete miss, minor overlap with original 5, 660, 0]],
-         [[1, 162, 65, 1000, 1000, 0]],
+        # class error with overlapping bb, but not completely
+        ([[44, 162, 65, 365, 660, 0]],
+         [[1, 170, 65, 365, 660, 0]],
          .5,
-         [ErrorLabelType.BOTH],
-         [None]),
+         np.array([ErrorLabelType.CLASS_NAME])),
 
-        # duplicate detection, 
+        # complete miss, minor overlap with original ,
+        ([[1, 162, 65, 1000, 1000, 0]],
+         [[2, 162, 65, 1000, 200, 0]],
+         .5,
+         np.array([ErrorLabelType.BOTH])),
+
+        # duplicate detection,
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 660, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         [None, ErrorLabelType.DUPLICATE_DETECTION],
-         [None]),
+         np.array([ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION])),
 
-        # duplicate detection, detections not identical but w/in iou range
+        # duplicate detection, detections not identical but w/in iou range. same conf score
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         [None, ErrorLabelType.DUPLICATE_DETECTION],
-         [None]),
+         np.array([ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION])),
+
+        # duplicate detection, detections not identical but w/in iou range.
+        # Detection with lower iou has diff conf score
+        ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 50]],
+         [[1, 162, 65, 365, 660, 0]],
+         .5,
+         np.array([ErrorLabelType.DUPLICATE_DETECTION, ErrorLabelType.MATCH])),
+
+        # Same as previous, but in a different order to ensure that conf score
+        # prioritization is working correctly
+        ([[1, 162, 65, 365, 659, 50], [1, 162, 65, 365, 660, 0]],
+         [[1, 162, 65, 365, 660, 0]],
+         .5,
+         np.array([ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION])),
 
         # background error with same class
         ([[1, 50, 50, 100, 100, 0]],
          [[1, 350, 350, 100, 100, 0]],
          .5,
-         [ErrorLabelType.BACKGROUND],
-         [ErrorLabelType.MISSING]),
+         np.array([ErrorLabelType.BACKGROUND])),
 
         # background error with different class
         ([[0, 50, 50, 100, 100, 0]],
          [[1, 350, 350, 100, 100, 0]],
          .5,
-         [ErrorLabelType.BACKGROUND],
-         [ErrorLabelType.MISSING]),
+         np.array([ErrorLabelType.BACKGROUND])),
 
-        # complete miss
+        # gt is empty
         ([[0, 1, 1, 20, 20, 0]],
-         [[1, 19, 19, 10, 10, 0]],
+         [],
          .5,
-         [ErrorLabelType.BOTH],
-         [ErrorLabelType.MISSING]),
+         np.array([ErrorLabelType.BACKGROUND])),
+
+        # pred is empty
+        ([],
+         [[0, 1, 1, 20, 20, 0]],
+         .5,
+         np.array([None])),
     ])
     def test_object_detection_image_labeling(self,
                                              pred_y,
                                              true_y,
                                              iou_threshold,
-                                             result,
-                                             result_missing):
+                                             result):
         task_type = ModelTask.OBJECT_DETECTION
         mng = ErrorLabeling(task_type,
-                                   pred_y,
-                                   true_y,
-                                   iou_threshold)
+                            pred_y,
+                            true_y,
+                            iou_threshold)
         mng.compute()
-        assert mng._prediction_error_labels == result
-        assert mng._missing_labels == result_missing
+        print(mng._match_matrix)
+        assert (mng._match_matrix == result).all()
 
 
 # TestErrorLabeling().test_object_detection_image_labeling([[1, 50, 50, 100, 100, 0]],
