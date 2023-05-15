@@ -44,6 +44,7 @@ class ErrorLabelType(Enum):
 
 class ErrorLabeling():
     """Defines a wrapper class of Error Labeling for vision scenario.
+
     Only supported for object detection at this point.
     """
 
