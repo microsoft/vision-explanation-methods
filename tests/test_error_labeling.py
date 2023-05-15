@@ -55,7 +55,8 @@ class TestErrorLabelingManager(object):
          .5,
          np.array([ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION])),
 
-        # duplicate detection, detections not identical but w/in iou range. same conf score
+        # duplicate detection, detections not identical but w/in iou range.
+        # same conf score
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
@@ -114,5 +115,6 @@ class TestErrorLabelingManager(object):
         assert (mng._match_matrix == result).all()
 
 
-# TestErrorLabeling().test_object_detection_image_labeling([[1, 50, 50, 100, 100, 0]],
-#          [[1, 350, 350, 100, 100, 0]],.5,[None, None])
+# TestErrorLabeling().test_object_detection_image_labeling(
+# [[1, 50, 50, 100, 100, 0]],
+#  [[1, 350, 350, 100, 100, 0]],.5,[None, None])

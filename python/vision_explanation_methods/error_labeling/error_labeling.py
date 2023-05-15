@@ -79,7 +79,8 @@ class ErrorLabeling():
         self._pred_y = pred_y
         self._true_y = true_y
         self._iou_threshold = iou_threshold
-        self._match_matrix = np.full((len(self._true_y), len(self._pred_y)), None)
+        self._match_matrix = np.full((len(self._true_y), len(self._pred_y)),
+                                     None)
 
     def compute(self, **kwargs):
         """Compute the error analysis data.
@@ -88,7 +89,9 @@ class ErrorLabeling():
             Note that this method does not take any arguments currently.
         :type kwargs: dict
         """
-        original_indices = [i for i, _ in sorted(enumerate(self._pred_y), key=lambda x: x[1][-1], reverse=True)]
+        original_indices = [i for i, _ in sorted(enumerate(self._pred_y),
+                                                 key=lambda x: x[1][-1],
+                                                 reverse=True)]
 
         # sort predictions by decreasing conf score
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
@@ -100,28 +103,35 @@ class ErrorLabeling():
                     Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
                     Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
                 if iou_score.item() == 0.0:
-                    self._match_matrix[gt_index][detect_index] = ErrorLabelType.BACKGROUND
+                    self._match_matrix[gt_index][detect_index] = (
+                        ErrorLabelType.BACKGROUND)
                     continue
                 if (self._iou_threshold <= iou_score):
                     # the detection and ground truth bb's must be overlapping
                     if detect[0] != gt[0]:
                         # the bb's line up, but labels do not
-                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.CLASS_NAME
+                        self._match_matrix[gt_index][detect_index] = (
+                            ErrorLabelType.CLASS_NAME)
                         continue
                     elif (ErrorLabelType.MATCH in
                           self._match_matrix[gt_index]):
-                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.DUPLICATE_DETECTION
+                        self._match_matrix[gt_index][detect_index] = (
+                            ErrorLabelType.DUPLICATE_DETECTION)
                         continue
                     else:
                         # this means bbs overlap, class names = (1st time)
-                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.MATCH
+                        self._match_matrix[gt_index][detect_index] = (
+                            ErrorLabelType.MATCH)
                         continue
                 else:
                     if detect[0] != gt[0]:
                         # the bb's don't line up, but labels do not
-                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.BOTH
+                        self._match_matrix[gt_index][detect_index] = (
+                            ErrorLabelType.BOTH)
                         continue
                     else:
-                        self._match_matrix[gt_index][detect_index] = ErrorLabelType.LOCALIZATION
+                        self._match_matrix[gt_index][detect_index] = (
+                            ErrorLabelType.LOCALIZATION)
                         continue
-            self._match_matrix[gt_index] = [self._match_matrix[gt_index][i] for i in original_indices]
+            self._match_matrix[gt_index] = [self._match_matrix[gt_index][i]
+                                            for i in original_indices]
