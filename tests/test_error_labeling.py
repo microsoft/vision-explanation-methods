@@ -134,5 +134,4 @@ class TestErrorLabelingManager(object):
                             true_y,
                             iou_threshold)
         mng.compute()
-        print(mng._match_matrix)
         assert (mng._match_matrix == result).all()
