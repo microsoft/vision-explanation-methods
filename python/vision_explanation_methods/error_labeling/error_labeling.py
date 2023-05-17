@@ -50,7 +50,6 @@ class ErrorLabeling():
     """
 
     def __init__(self,
-                 task_type: str,
                  pred_y: str,
                  true_y: str,
                  iou_threshold: float = 0.5):
@@ -66,20 +65,9 @@ class ErrorLabeling():
         :type evaluation_examples: pandas.DataFrame
         :param target_column: The name of the label column.
         :type target_column: str
-        :param task_type: The task to run.
-        :type task_type: str
-        :param classes: Class names as a list of strings.
-            The order of the class names should match that of the model
-            output. Only required if explaining classifier.
-        :type classes: list
-        :param image_mode: The mode to open the image in.
-            See pillow documentation for all modes:
-            https://pillow.readthedocs.io/en/stable/handbook/concepts.html
-        :type image_mode: str
         """
         self._is_run = False
         self._is_added = False
-        self._task_type = task_type
         self._pred_y = pred_y
         self._true_y = true_y
         self._iou_threshold = iou_threshold

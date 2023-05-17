@@ -128,9 +128,7 @@ class TestErrorLabelingManager(object):
                                              iou_threshold,
                                              result):
         """Compare _match_matrix attribute to expected result."""
-        task_type = 'object_detection'
-        mng = ErrorLabeling(task_type,
-                            pred_y,
+        mng = ErrorLabeling(pred_y,
                             true_y,
                             iou_threshold)
         mng.compute()
