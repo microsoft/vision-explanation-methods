@@ -153,3 +153,50 @@ class ErrorLabeling():
             # scores)
             self._match_matrix[gt_index] = [self._match_matrix[gt_index][i]
                                             for i in original_indices]
+
+    def compute_error_list(self):
+        error_arr = self._remove_matches(self._match_matrix.__deepcopy__)
+        error_list = []
+
+        diff = len(error_arr) - len(error_arr[0])
+        if diff > 0:
+            error_list += ErrorLabelType.MISSING * diff 
+
+        order_of_errors = [ErrorLabelType.DUPLICATE_DETECTION,
+                           ErrorLabelType.CLASS_NAME,
+                           ErrorLabelType.LOCALIZATION,
+                           ErrorLabelType.CLASS_LOCALIZATION,
+                           ErrorLabelType.BACKGROUND]
+        
+        for err in order_of_errors:
+            for gt_index, gt in enumerate(error_arr):
+                for detect_index, detect in enumerate(error_arr):
+                    if detect == err:
+
+
+        return error_list 
+
+    def _remove_matches(self, arr: np.array):
+        rows_to_delete = set()
+        cols_to_delete = set()
+
+        for row, row_items in enumerate(arr):
+            for col, value in enumerate(row_items):
+                if value == ErrorLabelType.MATCH
+                    rows_to_delete.add(row)
+                    cols_to_delete.add(col)
+
+        modified_array = self._remove_rows_cols(arr, rows_to_delete, cols_to)
+
+        return modified_array
+    
+    def _remove_rows_cols(self, arr: np.array):
+        # Delete rows
+        modified_array = [row for row_index, row in enumerate(arr)
+                          if row_index not in rows_to_delete]
+
+        # Delete columns
+        modified_array = [[value for col_index, value in enumerate(row)
+                           if col_index not in cols_to_delete]
+                           for row in modified_array]
+        return modified_array
