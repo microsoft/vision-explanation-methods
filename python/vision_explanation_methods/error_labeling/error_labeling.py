@@ -9,6 +9,8 @@ import numpy as np
 import torchvision
 from torch import Tensor
 
+from copy import deepcopy
+
 LABELS = 'labels'
 
 
@@ -105,6 +107,11 @@ class ErrorLabeling():
         # this is to stay consistent with NMS and MAP algorithms
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
+        if self._true_y == []:
+            self._match_matrix = [[ErrorLabelType.BACKGROUND]
+                                  for i in range(0, len(self._pred_y))]
+            return
+
         for gt_index, gt in enumerate(self._true_y):
             for detect_index, detect in enumerate(sorted_list):
                 iou_score = torchvision.ops.box_iou(
@@ -155,26 +162,43 @@ class ErrorLabeling():
                                             for i in original_indices]
 
     def compute_error_list(self):
-        error_arr = self._remove_matches(self._match_matrix.__deepcopy__)
-        error_list = []
+        """
+        Function to determine a complete list of errors encountered during the 
+        prediction of one image. Note that it is possible to have more errors than 
+        actual objects in an image (because we account for missing detections and 
+        duplicate detections).
+        """
+        self.compute()
+        error_arr = self._remove_matches(deepcopy(self._match_matrix))
+        dup_count = sum(1 for row in self._match_matrix for element in row
+                        if element == ErrorLabelType.DUPLICATE_DETECTION)
+        error_list = [ErrorLabelType.DUPLICATE_DETECTION
+                      for i in range(0, dup_count)]
+
+        if error_arr == []:
+            return error_list
 
         diff = len(error_arr) - len(error_arr[0])
         if diff > 0:
-            error_list += ErrorLabelType.MISSING * diff 
+            error_list += [ErrorLabelType.MISSING for i in range(0, diff)]
 
-        order_of_errors = [ErrorLabelType.DUPLICATE_DETECTION,
-                           ErrorLabelType.CLASS_NAME,
+        order_of_errors = [ErrorLabelType.CLASS_NAME,
                            ErrorLabelType.LOCALIZATION,
                            ErrorLabelType.CLASS_LOCALIZATION,
                            ErrorLabelType.BACKGROUND]
-        
+
         for err in order_of_errors:
             for gt_index, gt in enumerate(error_arr):
-                for detect_index, detect in enumerate(error_arr):
+                for detect_index, detect in enumerate(gt):
                     if detect == err:
+                        error_list.append(err)
+                        error_arr = self._remove_rows_cols(error_arr,
+                                                           set([gt_index]),
+                                                           set([detect_index]))
+                    if len(error_arr) == 0:
+                        break
 
-
-        return error_list 
+        return error_list
 
     def _remove_matches(self, arr: np.array):
         rows_to_delete = set()
@@ -182,15 +206,17 @@ class ErrorLabeling():
 
         for row, row_items in enumerate(arr):
             for col, value in enumerate(row_items):
-                if value == ErrorLabelType.MATCH
+                if value == ErrorLabelType.MATCH:
                     rows_to_delete.add(row)
                     cols_to_delete.add(col)
 
-        modified_array = self._remove_rows_cols(arr, rows_to_delete, cols_to)
+        modified_array = self._remove_rows_cols(arr,
+                                                rows_to_delete,
+                                                cols_to_delete)
 
         return modified_array
-    
-    def _remove_rows_cols(self, arr: np.array):
+
+    def _remove_rows_cols(self, arr: np.array, rows_to_delete, cols_to_delete):
         # Delete rows
         modified_array = [row for row_index, row in enumerate(arr)
                           if row_index not in rows_to_delete]
