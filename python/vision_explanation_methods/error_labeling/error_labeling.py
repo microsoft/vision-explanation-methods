@@ -162,8 +162,7 @@ class ErrorLabeling():
                                             for i in original_indices]
 
     def compute_error_list(self):
-        """Determine a complete list of errors encountered during
-        the prediction of one image.
+        """Determine a complete list of errors encountered during prediction.
 
         Note that it is possible to have more errors than actual objects
         in an image (because we account for missing detections and
@@ -202,9 +201,7 @@ class ErrorLabeling():
         return error_list
 
     def _remove_matches(self, arr: np.array):
-        """
-        Removes match rows and columns from a error labeling matrix.
-        """
+        """Remove match rows and columns from a error labeling matrix."""
         rows_to_delete = set()
         cols_to_delete = set()
 
@@ -221,9 +218,7 @@ class ErrorLabeling():
         return modified_array
 
     def _remove_rows_cols(self, arr: np.array, rows_to_delete, cols_to_delete):
-        """
-        Remove rows and columns from a given array.
-        """
+        """Remove rows and columns from a given array."""
         # Delete rows
         modified_array = [row for row_index, row in enumerate(arr)
                           if row_index not in rows_to_delete]
