@@ -3,13 +3,12 @@
 
 """Defines the Error Labeling Manager class."""
 
+from copy import deepcopy
 from enum import Enum
 
 import numpy as np
 import torchvision
 from torch import Tensor
-
-from copy import deepcopy
 
 LABELS = 'labels'
 
