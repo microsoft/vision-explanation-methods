@@ -136,7 +136,6 @@ class TestErrorLabelingManager(object):
         mng.compute()
         assert (mng._match_matrix == result).all()
 
-
     @pytest.mark.parametrize(("pred_y", "true_y", "iou_threshold", "result"), [
         # correct instance, prediction exactly the same
         ([[44, 162, 65, 365, 660, 0]],
@@ -257,9 +256,3 @@ class TestErrorLabelingManager(object):
                             iou_threshold)
         lst = mng.compute_error_list()
         assert (lst == result)
-
-
-# TestErrorLabelingManager.test_object_detection_err_list_labeling(TestErrorLabelingManager(),[[0, 1, 1, 20, 20, 0]],
-#          [],
-#          .5,
-#          np.array([ErrorLabelType.BACKGROUND]))
