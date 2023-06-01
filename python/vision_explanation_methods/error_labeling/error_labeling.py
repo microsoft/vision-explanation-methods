@@ -56,7 +56,8 @@ class ErrorLabeling():
                  pred_y: list,
                  true_y: list,
                  iou_threshold: float = 0.5):
-        """Create an ErrorLabeling object.
+        """
+        Create an ErrorLabeling object.
 
         :param task_type: The task to run.
         :type task_type: str
