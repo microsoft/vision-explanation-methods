@@ -61,12 +61,14 @@ class ErrorLabeling():
         :param task_type: The task to run.
         :type task_type: str
         :param pred_y: predicted detections, nested list of 6 floats (class,
-        bounding box, conf score)
+        bounding box, conf score). The bounding box will be located at indexes
+        1-4.
         :type pred_y: list
         :param true_y: ground truth detections, nested list of 6 floats (class,
-        bounding box, is crowded)
+        bounding box, is crowded). The bounding box will be located at indexes
+        1-4.
         :type true_y: list
-        :param iou_threshold: required minimum for bounding box overlap 
+        :param iou_threshold: required minimum for bounding box overlap
         :type iou_threshold: float
         """
         self._is_run = False
@@ -113,16 +115,16 @@ class ErrorLabeling():
                     self._match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
                     continue
-                if (self._iou_threshold <= iou_score):
-                    # the detection and ground truth bb's are overlapping
+                elif (self._iou_threshold <= iou_score):
+                    # the detection and ground truth bboxes are overlapping
                     if detect[0] != gt[0]:
-                        # the bb's line up, but labels do not
+                        # the bboxes line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_NAME)
                         continue
                     elif (ErrorLabelType.MATCH in
                           self._match_matrix[gt_index]):
-                        # class name and bb correct, but there is already a
+                        # class name and bbox correct, but there is already a
                         # match with a higher confidence score (this is why
                         # it was imporant to sort by descending confidence
                         # scores as the first step)
@@ -130,18 +132,18 @@ class ErrorLabeling():
                             ErrorLabelType.DUPLICATE_DETECTION)
                         continue
                     else:
-                        # this means bbs overlap, class names = (1st time)
+                        # this means bboxes overlap, class names = (1st time)
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.MATCH)
                         continue
                 else:
                     if detect[0] != gt[0]:
-                        # the bb's don't line up, and labels do not
+                        # the bboxes don't line up, and labels do not
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_LOCALIZATION)
                         continue
                     else:
-                        # the bb's don't line up, but the labels are correct
+                        # the bboxes don't line up, but the labels are correct
                         self._match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.LOCALIZATION)
                         continue
@@ -191,7 +193,14 @@ class ErrorLabeling():
         return error_list
 
     def _remove_matches(self, arr: np.array):
-        """Remove match rows and columns from a error labeling matrix."""
+        """
+        Remove match rows and columns from a error labeling matrix.
+
+        :param arr: np 2d array
+        :type arr: np.array
+        :return: array with removed rows and columns
+        :rtype: np.array
+        """
         rows_to_delete = set()
         cols_to_delete = set()
 
@@ -207,8 +216,22 @@ class ErrorLabeling():
 
         return modified_array
 
-    def _remove_rows_cols(self, arr: np.array, rows_to_delete, cols_to_delete):
-        """Remove rows and columns from a given array."""
+    def _remove_rows_cols(self,
+                          arr: np.array,
+                          rows_to_delete: set,
+                          cols_to_delete: set):
+        """
+        Remove rows and columns from a given array.
+
+        :param arr: np 2d array
+        :type arr: np.array
+        :param rows_to_delete: unique set of indexes of rows to remove
+        :type rows_to_delete: set
+        :param cols_to_delete: unique set of indexes of cols to remove
+        :type cols_to_delete: set
+        :return: array with removed rows and columns
+        :rtype: np.array
+        """
         # Delete rows
         modified_array = [row for row_index, row in enumerate(arr)
                           if row_index not in rows_to_delete]
