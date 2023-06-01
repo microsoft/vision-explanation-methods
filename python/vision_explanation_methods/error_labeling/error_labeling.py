@@ -28,7 +28,8 @@ class ErrorLabelType(Enum):
     # this prediction must have a 0 iou score with all gt detections
     BACKGROUND = "background"
 
-    # the predicted class is correct, bounding box is not
+    # the predicted class is correct, bounding box does not have sufficient
+    # overlap with ground truth (based on the iou threshold)
     LOCALIZATION = "localization"
 
     # the predicted class is incorrect, the bounding box is correct
@@ -52,31 +53,21 @@ class ErrorLabeling():
 
     def __init__(self,
                  task_type: str,
-                 pred_y: str,
-                 true_y: str,
+                 pred_y: list,
+                 true_y: list,
                  iou_threshold: float = 0.5):
         """Create an ErrorLabeling object.
 
-        :param model: The model to explain.
-            A model that implements sklearn.predict or sklearn.predict_proba
-            or function that accepts a 2d ndarray.
-        :type model: object
-        :param evaluation_examples: A matrix of feature vector
-            examples (# examples x # features) on which to explain the
-            model's output, with an additional label column.
-        :type evaluation_examples: pandas.DataFrame
-        :param target_column: The name of the label column.
-        :type target_column: str
         :param task_type: The task to run.
         :type task_type: str
-        :param classes: Class names as a list of strings.
-            The order of the class names should match that of the model
-            output. Only required if explaining classifier.
-        :type classes: list
-        :param image_mode: The mode to open the image in.
-            See pillow documentation for all modes:
-            https://pillow.readthedocs.io/en/stable/handbook/concepts.html
-        :type image_mode: str
+        :param pred_y: predicted detections, nested list of 6 floats (class,
+        bounding box, conf score)
+        :type pred_y: list
+        :param true_y: ground truth detections, nested list of 6 floats (class,
+        bounding box, is crowded)
+        :type true_y: list
+        :param iou_threshold: required minimum for bounding box overlap 
+        :type iou_threshold: float
         """
         self._is_run = False
         self._is_added = False
