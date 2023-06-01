@@ -163,7 +163,7 @@ class ErrorLabeling():
         dup_count = sum(1 for row in self._match_matrix for element in row
                         if element == ErrorLabelType.DUPLICATE_DETECTION)
         error_list = [ErrorLabelType.DUPLICATE_DETECTION
-                      for i in range(0, dup_count)]
+                      for _ in range(dup_count)]
 
         if len(error_arr) == 0:
             return error_list
