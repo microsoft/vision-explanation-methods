@@ -99,7 +99,7 @@ class ErrorLabeling():
 
         if len(self._true_y) == 0:
             self._match_matrix = [[ErrorLabelType.BACKGROUND]
-                                  for i in range(0, len(self._pred_y))]
+                                  for _ in range(len(self._pred_y))]
             return
 
         for gt_index, gt in enumerate(self._true_y):
