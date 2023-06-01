@@ -113,7 +113,7 @@ class ErrorLabeling():
                     self._match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
                     continue
-                if (self._iou_threshold <= iou_score):
+                if self._iou_threshold <= iou_score:
                     # the detection and ground truth bb's are overlapping
                     if detect[0] != gt[0]:
                         # the bb's line up, but labels do not
