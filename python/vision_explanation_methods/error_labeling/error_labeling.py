@@ -46,7 +46,8 @@ class ErrorLabelType(Enum):
 
 
 class ErrorLabeling():
-    """Defines a wrapper class of Error Labeling for vision scenario.
+    """
+    Defines a wrapper class of Error Labeling for vision scenario.
 
     Only supported for object detection at this point.
     """
@@ -82,7 +83,8 @@ class ErrorLabeling():
                                      None)
 
     def compute(self, **kwargs):
-        """Compute the error analysis data.
+        """
+        Compute the error analysis data.
 
         Note: if a row does not have a match, that means that there is a
         missing gt detection
@@ -155,7 +157,8 @@ class ErrorLabeling():
                                             for i in original_indices]
 
     def compute_error_list(self):
-        """Determine a complete list of errors encountered during prediction.
+        """
+        Determine a complete list of errors encountered during prediction.
 
         Note that it is possible to have more errors than actual objects
         in an image (because we account for missing detections and
