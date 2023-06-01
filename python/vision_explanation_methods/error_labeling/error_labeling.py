@@ -170,7 +170,8 @@ class ErrorLabeling():
 
         diff = len(error_arr) - len(error_arr[0])
         if diff > 0:
-            error_list += [ErrorLabelType.MISSING for i in range(0, diff)]
+            for _ in range(diff):
+                error_list.append(ErrorLabelType.MISSING)
 
         order_of_errors = [ErrorLabelType.CLASS_NAME,
                            ErrorLabelType.LOCALIZATION,
