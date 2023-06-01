@@ -165,7 +165,7 @@ class ErrorLabeling():
         error_list = [ErrorLabelType.DUPLICATE_DETECTION
                       for i in range(0, dup_count)]
 
-        if error_arr == []:
+        if len(error_arr) == 0:
             return error_list
 
         diff = len(error_arr) - len(error_arr[0])
