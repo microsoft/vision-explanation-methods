@@ -97,7 +97,7 @@ class ErrorLabeling():
         # this is to stay consistent with NMS and MAP algorithms
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
-        if self._true_y == []:
+        if len(self._true_y) == 0:
             self._match_matrix = [[ErrorLabelType.BACKGROUND]
                                   for i in range(0, len(self._pred_y))]
             return
