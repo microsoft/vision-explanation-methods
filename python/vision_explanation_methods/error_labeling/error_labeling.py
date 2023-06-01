@@ -108,7 +108,7 @@ class ErrorLabeling():
                     Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
                     Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
 
-                if iou_score.item() == 0.0:
+                if iou_score.item() == 0:
                     # if iou is 0, then prediction is detecting the background
                     self._match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
