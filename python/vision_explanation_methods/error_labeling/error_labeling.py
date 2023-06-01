@@ -110,13 +110,13 @@ class ErrorLabeling():
                     Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
                     Tensor(gt[1:5]).unsqueeze(0).view(-1, 4))
 
-                if iou_score.item() == 0.0:
+                if iou_score.item() == 0:
                     # if iou is 0, then prediction is detecting the background
                     self._match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
                     continue
-                elif (self._iou_threshold <= iou_score):
-                    # the detection and ground truth bboxes are overlapping
+                elif self._iou_threshold <= iou_score:
+                    # the detection and ground truth bb's are overlapping
                     if detect[0] != gt[0]:
                         # the bboxes line up, but labels do not
                         self._match_matrix[gt_index][detect_index] = (
@@ -165,14 +165,15 @@ class ErrorLabeling():
         dup_count = sum(1 for row in self._match_matrix for element in row
                         if element == ErrorLabelType.DUPLICATE_DETECTION)
         error_list = [ErrorLabelType.DUPLICATE_DETECTION
-                      for i in range(0, dup_count)]
+                      for _ in range(dup_count)]
 
-        if error_arr == []:
+        if len(error_arr) == 0:
             return error_list
 
         diff = len(error_arr) - len(error_arr[0])
         if diff > 0:
-            error_list += [ErrorLabelType.MISSING for i in range(0, diff)]
+            for _ in range(diff):
+                error_list.append(ErrorLabelType.MISSING)
 
         order_of_errors = [ErrorLabelType.CLASS_NAME,
                            ErrorLabelType.LOCALIZATION,
