@@ -4,7 +4,7 @@
 """Defines a variety of explanation evaluation tools."""
 
 from io import BytesIO
-from typing import Any
+from typing import Any, List
 
 import numpy as np
 import requests
@@ -129,8 +129,8 @@ class PointingGame:
         return fig
 
     def calculate_gt_salient_pixel_overlap(self,
-                                           saliency_scores: list[Tensor],
-                                           gt_bbox: list):
+                                           saliency_scores: List[Tensor],
+                                           gt_bbox: List):
         """
         Calculate percent of overlap between salient pixels and gt bbox.
 
