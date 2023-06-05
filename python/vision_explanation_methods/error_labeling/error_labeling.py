@@ -79,20 +79,19 @@ class ErrorLabeling():
         self._pred_y = pred_y
         self._true_y = true_y
         self._iou_threshold = iou_threshold
-        self._match_matrix = np.full((len(self._true_y), len(self._pred_y)),
-                                     None)
 
-    def compute(self, **kwargs):
+    def compute_error_labels(self):
         """
-        Compute the error analysis data.
+        Compute labels for errors in an object detection prediction.
 
         Note: if a row does not have a match, that means that there is a
         missing gt detection
 
-        :param kwargs: The keyword arguments to pass to the compute method.
-            Note that this method does not take any arguments currently.
-        :type kwargs: dict
+        :return: 2d matrix of error labels
+        :rtype: NDArray
         """
+        match_matrix = np.full((len(self._true_y), len(self._pred_y)),
+                               None)
         # save original ordering of predictions
         original_indices = [i for i, _ in sorted(enumerate(self._pred_y),
                                                  key=lambda x: x[1][-1],
@@ -103,8 +102,8 @@ class ErrorLabeling():
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
         if len(self._true_y) == 0:
-            self._match_matrix = [[ErrorLabelType.BACKGROUND]
-                                  for _ in range(len(self._pred_y))]
+            match_matrix = [[ErrorLabelType.BACKGROUND]
+                            for _ in range(len(self._pred_y))]
             return
 
         for gt_index, gt in enumerate(self._true_y):
@@ -115,46 +114,47 @@ class ErrorLabeling():
 
                 if iou_score.item() == 0:
                     # if iou is 0, then prediction is detecting the background
-                    self._match_matrix[gt_index][detect_index] = (
+                    match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
                     continue
                 elif self._iou_threshold <= iou_score:
                     # the detection and ground truth bb's are overlapping
                     if detect[0] != gt[0]:
                         # the bboxes line up, but labels do not
-                        self._match_matrix[gt_index][detect_index] = (
+                        match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_NAME)
                         continue
                     elif (ErrorLabelType.MATCH in
-                          self._match_matrix[gt_index]):
+                          match_matrix[gt_index]):
                         # class name and bbox correct, but there is already a
                         # match with a higher confidence score (this is why
                         # it was imporant to sort by descending confidence
                         # scores as the first step)
-                        self._match_matrix[gt_index][detect_index] = (
+                        match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.DUPLICATE_DETECTION)
                         continue
                     else:
                         # this means bboxes overlap, class names = (1st time)
-                        self._match_matrix[gt_index][detect_index] = (
+                        match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.MATCH)
                         continue
                 else:
                     if detect[0] != gt[0]:
                         # the bboxes don't line up, and labels do not
-                        self._match_matrix[gt_index][detect_index] = (
+                        match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_LOCALIZATION)
                         continue
                     else:
                         # the bboxes don't line up, but the labels are correct
-                        self._match_matrix[gt_index][detect_index] = (
+                        match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.LOCALIZATION)
                         continue
 
             # resort the columns (so no longer ordered by descending conf
             # scores)
-            self._match_matrix[gt_index] = [self._match_matrix[gt_index][i]
-                                            for i in original_indices]
+            match_matrix[gt_index] = [match_matrix[gt_index][i]
+                                      for i in original_indices]
+            return match_matrix
 
     def compute_error_list(self):
         """
@@ -164,12 +164,11 @@ class ErrorLabeling():
         in an image (because we account for missing detections and
         duplicate detections).
         """
-        self.compute()
-        error_arr = self._remove_matches(deepcopy(self._match_matrix))
-        dup_count = sum(1 for row in self._match_matrix for element in row
-                        if element == ErrorLabelType.DUPLICATE_DETECTION)
-        error_list = [ErrorLabelType.DUPLICATE_DETECTION
-                      for _ in range(dup_count)]
+        match_matrix = self.compute_error_labels()
+        error_arr = self._remove_matches(deepcopy(match_matrix))
+        dup_count = np.count_nonzero(match_matrix ==
+                                     ErrorLabelType.DUPLICATE_DETECTION)
+        error_list = [ErrorLabelType.DUPLICATE_DETECTION * dup_count]
 
         if len(error_arr) == 0:
             return error_list
@@ -192,8 +191,8 @@ class ErrorLabeling():
                         error_arr = self._remove_rows_cols(error_arr,
                                                            set([gt_index]),
                                                            set([detect_index]))
-                    if len(error_arr) == 0:
-                        break
+                        if len(error_arr) == 0:
+                            break
 
         return error_list
 
