@@ -132,8 +132,7 @@ class PointingGame:
                                            saliency_scores: list[Tensor],
                                            gt_bbox: list):
         """
-        Calculate percent of overlap between salient pixels and ground truth
-        bounding box.
+        Calculate percent of overlap between salient pixels and gt bbox.
 
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
@@ -158,7 +157,8 @@ class PointingGame:
         return total_percent
 
     def _get_device(self, device: str) -> str:
-        """Sets the device to run computations on to the desired value.
+        """
+        Set the device to run computations on to the desired value.
 
         If device were set to "auto", then the desired device will be cuda
         (GPU) if available. Otherwise, the device should be set to cpu.

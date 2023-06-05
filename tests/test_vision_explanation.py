@@ -9,7 +9,8 @@ import os
 import urllib.request as request_file
 
 import vision_explanation_methods.DRISE_runner as dr
-from vision_explanation_methods.explanation_evaluation.pointing_game import PointingGame
+from vision_explanation_methods.explanation_evaluation.\
+    pointing_game import PointingGame
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 
 module_logger = logging.getLogger(__name__)
