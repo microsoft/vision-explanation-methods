@@ -168,7 +168,8 @@ class ErrorLabeling():
         error_arr = self._remove_matches(deepcopy(match_matrix))
         dup_count = np.count_nonzero(match_matrix ==
                                      ErrorLabelType.DUPLICATE_DETECTION)
-        error_list = [ErrorLabelType.DUPLICATE_DETECTION * dup_count]
+        error_list = [ErrorLabelType.DUPLICATE_DETECTION
+                      for _ in range(dup_count)]
 
         if len(error_arr) == 0:
             return error_list
