@@ -63,12 +63,12 @@ class ErrorLabeling():
         :param task_type: The task to run.
         :type task_type: str
         :param pred_y: predicted detections, nested list of 6 floats (class,
-        bounding box, conf score). The bounding box will be located at indexes
-        1-4.
+            bounding box, conf score). The bounding box will be located at
+            indexes 1-4.
         :type pred_y: list
         :param true_y: ground truth detections, nested list of 6 floats (class,
-        bounding box, is crowded). The bounding box will be located at indexes
-        1-4.
+            bounding box, is crowded). The bounding box will be located at
+            indexes 1-4.
         :type true_y: list
         :param iou_threshold: required minimum for bounding box overlap
         :type iou_threshold: float
