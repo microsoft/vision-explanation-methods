@@ -57,7 +57,7 @@ class PointingGame:
             set to -1
         :type threshold: float
         :param num_masks: number of masks to run drise with
-        :type num_masks: int 
+        :type num_masks: int
         :return: 2d matrix of highly salient pixels
         :rtype: List[Tensor]
         """
