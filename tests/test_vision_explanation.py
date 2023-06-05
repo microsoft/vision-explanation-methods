@@ -215,10 +215,14 @@ def test_vision_explain_evaluation():
     model = _get_instance_segmentation_model(5)
     model.load_state_dict(torch.load(modelpath, device))
     model.to(device)
+    model.eval()
+    model.to("cuda")
+    detection_model = PytorchDRiseWrapper(model=model,
+                                          number_of_classes=1000)
 
     # find saliency scores for top 20% of salient pixels
     # do this for the second object in an image
-    pg = PointingGame(model)
+    pg = PointingGame(detection_model)
     s = pg.pointing_game(imgpath, 1, .8)
 
     # check that the saliency map exists and has 3 channels
