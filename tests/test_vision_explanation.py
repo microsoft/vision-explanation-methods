@@ -9,6 +9,7 @@ import os
 import urllib.request as request_file
 
 import vision_explanation_methods.DRISE_runner as dr
+from vision_explanation_methods.explanation_evaluation.pointing_game import PointingGame
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 
 module_logger = logging.getLogger(__name__)
@@ -193,3 +194,36 @@ def test_vision_explain_loadmodel():
     # delete files created during testing
     for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
+
+
+def test_vision_explain_evaluation():
+    """End to end testing for explanation evaluation."""
+    # pointing game run
+    imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
+                           '128.jpg')
+    # load fastrcnn model
+    modelpath = os.path.join('python', 'vision_explanation_methods', 'models',
+                             'fastrcnn.pt')
+    # save tested result in res
+
+    # use helper function from above to fetch model
+    _ = download_assets(modelpath)
+
+    # run the main function for saliency map generation
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = _get_instance_segmentation_model(5)
+    model.load_state_dict(torch.load(modelpath, device))
+    model.to(device)
+
+    # find saliency scores for top 20% of salient pixels
+    # do this for the second object in an image 
+    pg = PointingGame(model)
+    s = pg.pointing_game(imgpath, 1, .8)
+
+    # check that the saliency map exists and has 3 channels
+    assert (len(s) == 3)
+
+    v = pg.calculate_gt_salient_pixel_overlaps(s, [244, 139, 428, 519])
+
+    # check that this is a percent value
+    assert (0 < v < 1)
