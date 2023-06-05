@@ -4,6 +4,7 @@
 """Defines a variety of explanation evaluation tools."""
 
 from io import BytesIO
+from typing import Any
 
 import numpy as np
 import requests
@@ -13,10 +14,9 @@ from captum.attr import visualization as viz
 from matplotlib import pyplot as pl
 from PIL import Image
 from torch import Tensor
-from typing import Any
 
-from ..explanations import drise
 from ..common.constants import Device
+from ..explanations import drise
 
 
 class PointingGame:
