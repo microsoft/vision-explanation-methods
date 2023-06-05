@@ -216,7 +216,6 @@ def test_vision_explain_evaluation():
     model.load_state_dict(torch.load(modelpath, device))
     model.to(device)
     model.eval()
-    model.to("cuda")
     detection_model = PytorchDRiseWrapper(model=model,
                                           number_of_classes=1000)
 
