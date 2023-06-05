@@ -39,7 +39,8 @@ class PointingGame:
     def pointing_game(self,
                       imagelocation: str,
                       index: int,
-                      threshold: float):
+                      threshold: float,
+                      num_masks: int = 100):
         """
         Calculate the saliency scores for a given object detection prediction.
 
@@ -54,7 +55,9 @@ class PointingGame:
         :param threshold: threshold between 0 and 1 to determine saliency of a
             pixel. If saliency score is below the threshold, then the score is
             set to -1
-        :type model: PyTorch model
+        :type threshold: float
+        :param num_masks: number of masks to run drise with
+        :type num_masks: int 
         :return: 2d matrix of highly salient pixels
         :rtype: List[Tensor]
         """
@@ -78,7 +81,7 @@ class PointingGame:
                 target_detections=detections,
                 # This is how many masks to run -
                 # more is slower but gives higher quality mask.
-                number_of_masks=100,
+                number_of_masks=num_masks,
                 mask_padding=None,
                 device=self._device,
                 # This is the resolution of the random masks.
