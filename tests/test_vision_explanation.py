@@ -216,7 +216,7 @@ def test_vision_explain_evaluation():
     model.to(device)
 
     # find saliency scores for top 20% of salient pixels
-    # do this for the second object in an image 
+    # do this for the second object in an image
     pg = PointingGame(model)
     s = pg.pointing_game(imgpath, 1, .8)
 
