@@ -144,7 +144,7 @@ class PointingGame:
         total = 0
         total_percent = 0
         for channel in saliency_scores:
-            for iindex, i in enumerate(saliency_scores):
+            for iindex, i in enumerate(channel):
                 for jindex, j in enumerate(i):
                     if j > 0:
                         if (gt_bbox[0] < iindex < gt_bbox[2]
