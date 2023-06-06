@@ -104,7 +104,7 @@ class ErrorLabeling():
         if len(self._true_y) == 0:
             match_matrix = [[ErrorLabelType.BACKGROUND]
                             for _ in range(len(self._pred_y))]
-            return
+            return match_matrix
 
         for gt_index, gt in enumerate(self._true_y):
             for detect_index, detect in enumerate(sorted_list):

@@ -114,7 +114,7 @@ class TestErrorLabelingManager(object):
         ([],
          [[0, 1, 1, 20, 20, 0]],
          .5,
-         np.array([None])),
+         np.array([ErrorLabelType.BACKGROUND])),
 
         # edge case for background error (bb's touch, but iou is 0)
         ([[44, 5, 5, 1, 1, 0]],
