@@ -133,8 +133,8 @@ class TestErrorLabelingManager(object):
                             pred_y,
                             true_y,
                             iou_threshold)
-        mng.compute_error_labels()
-        assert (mng._match_matrix == result).all()
+        err = mng.compute_error_labels()
+        assert (err == result).all()
 
     @pytest.mark.parametrize(("pred_y", "true_y", "iou_threshold", "result"), [
         # correct instance, prediction exactly the same
