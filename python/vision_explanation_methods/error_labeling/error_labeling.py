@@ -150,11 +150,11 @@ class ErrorLabeling():
                             ErrorLabelType.LOCALIZATION)
                         continue
 
-            # resort the columns (so no longer ordered by descending conf
-            # scores)
-            match_matrix[gt_index] = [match_matrix[gt_index][i]
-                                      for i in original_indices]
-            return match_matrix
+        # resort the columns (so no longer ordered by descending conf
+        # scores)
+        match_matrix[gt_index] = [match_matrix[gt_index][i]
+                                  for i in original_indices]
+        return match_matrix
 
     def compute_error_list(self):
         """
