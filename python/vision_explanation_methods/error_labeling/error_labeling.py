@@ -116,14 +116,12 @@ class ErrorLabeling():
                     # if iou is 0, then prediction is detecting the background
                     match_matrix[gt_index][detect_index] = (
                         ErrorLabelType.BACKGROUND)
-                    continue
                 elif self._iou_threshold <= iou_score:
                     # the detection and ground truth bb's are overlapping
                     if detect[0] != gt[0]:
                         # the bboxes line up, but labels do not
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_NAME)
-                        continue
                     elif (ErrorLabelType.MATCH in
                           match_matrix[gt_index]):
                         # class name and bbox correct, but there is already a
@@ -132,23 +130,19 @@ class ErrorLabeling():
                         # scores as the first step)
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.DUPLICATE_DETECTION)
-                        continue
                     else:
                         # this means bboxes overlap, class names = (1st time)
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.MATCH)
-                        continue
                 else:
                     if detect[0] != gt[0]:
                         # the bboxes don't line up, and labels do not
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.CLASS_LOCALIZATION)
-                        continue
                     else:
                         # the bboxes don't line up, but the labels are correct
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.LOCALIZATION)
-                        continue
 
         # resort the columns (so no longer ordered by descending conf
         # scores)
