@@ -12,10 +12,10 @@ import torch
 import torchvision.transforms as T
 from captum.attr import visualization as viz
 from matplotlib import pyplot as pl
+from ml_wrappers.common.constants import Device
 from PIL import Image
 from torch import Tensor
 
-from ml_wrappers.common.constants import Device
 from ..explanations import drise
 
 
