@@ -144,7 +144,6 @@ class PointingGame:
         """
         good = 0
         total = 0
-        total_percent = 0
         for iindex, i in enumerate(saliency_scores):
             for jindex, j in enumerate(i):
                 if j > 0:
@@ -152,9 +151,7 @@ class PointingGame:
                        and gt_bbox[1] < jindex < gt_bbox[3]):
                         good += 1
                     total += 1
-        percent = good / total
-        total_percent += percent
-        return total_percent
+        return good / total
 
     def _get_device(self, device: str) -> str:
         """
