@@ -116,7 +116,7 @@ class PointingGame:
             np.transpose(
                 saliency_scores.cpu().detach().numpy(),
                 (1, 2, 0)),
-            np.transpose(T.ToTensor()(img).numpy(), (1, 2, 0)),
+            np.transpose(T.ToTensor()(img).detach().cpu().numpy(), (1, 2, 0)),
             method="blended_heat_map",
             sign="positive",
             show_colorbar=True,
