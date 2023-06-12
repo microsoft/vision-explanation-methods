@@ -169,7 +169,7 @@ class PointingGame:
         :return: selected device to run computations on
         :rtype: str
         """
-        if (device in [member.value for member in Device]
+        if (device in set(member.value for member in Device)
            or type(device) == int or device is None):
             if device == Device.AUTO.value:
                 return (Device.CUDA.value if torch.cuda.is_available()
