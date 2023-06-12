@@ -10,8 +10,7 @@ import urllib.request as request_file
 
 import vision_explanation_methods.DRISE_runner as dr
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
-from vision_explanation_methods.evaluation.pointing_game import \
-    PointingGame
+from vision_explanation_methods.evaluation.pointing_game import PointingGame
 
 module_logger = logging.getLogger(__name__)
 module_logger.setLevel(logging.INFO)
@@ -222,7 +221,8 @@ def test_vision_explain_evaluation():
     # find saliency scores for top 20% of salient pixels
     # do this for the second object in an image
     pg = PointingGame(detection_model)
-    s = pg.pointing_game(imgpath, 1, .8)
+    index = 1
+    s = pg.pointing_game(imgpath, index)
 
     # check that the saliency map exists and has 3 channels
     assert (len(s) == 3)

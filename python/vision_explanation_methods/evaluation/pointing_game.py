@@ -13,6 +13,7 @@ import torchvision.transforms as T
 from captum.attr import visualization as viz
 from matplotlib import pyplot as pl
 from ml_wrappers.common.constants import Device
+from ml_wrappers.model.image_model_wrapper import _get_device
 from PIL import Image
 from torch import Tensor
 
@@ -33,19 +34,24 @@ class PointingGame:
             model to. If not specified, then cpu is the default
         :type device: str
         """
-        self._device = torch.device(self._get_device(device))
+        self._device = torch.device(_get_device(device))
         self._model = model
 
     def pointing_game(self,
                       imagelocation: str,
                       index: int,
-                      threshold: float,
+                      threshold: float = .8,
                       num_masks: int = 100):
         """
         Calculate the saliency scores for a given object detection prediction.
 
         The calculated value is a matrix of saliency scores. Values below
-        the threshold are set to -1.
+        the threshold are set to -1. The goal here is to filter out
+        insignificant saliency scores, and identify highly salient pixels.
+        That is why it is called a pointing game - we want to "point", i.e.
+        identify, all highly salient pixels. That way we can easily
+        determine if these highly salient pixels overlap with the gt bounding
+        box.
 
         :param imagelocation: Path of the image location
         :type imagelocation: str
@@ -102,8 +108,8 @@ class PointingGame:
         """
         Create figure of highly salient pixels.
 
-        :param imagelocation: Path of the image location
-        :type imagelocation: str
+        :param img: PIL test image
+        :type img: PIL.Image
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
         :type saliency_scores: List[Tensor]
@@ -155,25 +161,3 @@ class PointingGame:
         total = positive_mask.sum().item()
 
         return good / total
-
-    def _get_device(self, device: str) -> str:
-        """
-        Set the device to run computations on to the desired value.
-
-        If device were set to "auto", then the desired device will be cuda
-        (GPU) if available. Otherwise, the device should be set to cpu.
-
-        :param device: parameter specifying the device to move the model
-            to.
-        :type device: str
-        :return: selected device to run computations on
-        :rtype: str
-        """
-        if (device in set(member.value for member in Device)
-           or type(device) == int or device is None):
-            if device == Device.AUTO.value:
-                return (Device.CUDA.value if torch.cuda.is_available()
-                        else Device.CPU.value)
-            return device.value
-        else:
-            raise ValueError("Selected device is invalid")
