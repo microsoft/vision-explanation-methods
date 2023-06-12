@@ -15,7 +15,7 @@ from matplotlib import pyplot as pl
 from PIL import Image
 from torch import Tensor
 
-from ..common.constants import Device
+from ml_wrappers.common.constants import Device
 from ..explanations import drise
 
 
