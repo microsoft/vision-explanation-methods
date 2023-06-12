@@ -114,7 +114,7 @@ class PointingGame:
 
         viz.visualize_image_attr(
             np.transpose(
-                saliency_scores.cpu().detach().numpy(),
+                saliency_scores.detach().cpu().numpy(),
                 (1, 2, 0)),
             np.transpose(T.ToTensor()(img).detach().cpu().numpy(), (1, 2, 0)),
             method="blended_heat_map",
