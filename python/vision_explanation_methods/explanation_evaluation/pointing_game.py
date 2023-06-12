@@ -152,7 +152,7 @@ class PointingGame:
                        and gt_bbox[1] < jindex < gt_bbox[3]):
                         good += 1
                     total += 1
-        percent = good/total
+        percent = good / total
         total_percent += percent
         return total_percent
 
