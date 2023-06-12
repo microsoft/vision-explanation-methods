@@ -142,15 +142,18 @@ class PointingGame:
         :return: return percent of salient pixel overlap with the ground truth
         :rtype: Float
         """
-        good = 0
-        total = 0
-        for iindex, i in enumerate(saliency_scores):
-            for jindex, j in enumerate(i):
-                if j > 0:
-                    if (gt_bbox[0] < iindex < gt_bbox[2]
-                       and gt_bbox[1] < jindex < gt_bbox[3]):
-                        good += 1
-                    total += 1
+        saliency_scores = torch.tensor(saliency_scores)
+        gt_bbox = torch.tensor(gt_bbox)
+
+        gt_mask = torch.zeros_like(saliency_scores, dtype=torch.bool)
+        gt_mask[gt_bbox[0]:gt_bbox[2], gt_bbox[1]:gt_bbox[3]] = True
+
+        positive_mask = saliency_scores > 0
+        positive_gt_mask = torch.logical_and(positive_mask, gt_mask)
+
+        good = positive_gt_mask.sum().item()
+        total = positive_mask.sum().item()
+
         return good / total
 
     def _get_device(self, device: str) -> str:
