@@ -156,11 +156,7 @@ class PointingGame:
 
         positive_mask = torch.gt(saliency_scores, 0)
         positive_gt_mask = torch.logical_and(positive_mask, gt_mask)
-good = positive_gt_mask.sum()
-total = positive_mask.sum()
+        good = positive_gt_mask.sum()
+        total = positive_mask.sum()
 
-return torch.div(good, total).item()
-        good = positive_gt_mask.sum().item()
-        total = positive_mask.sum().item()
-
-        return good / total
+        return torch.div(good, total).item()
