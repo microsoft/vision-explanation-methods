@@ -154,7 +154,7 @@ class PointingGame:
         gt_mask = torch.zeros_like(saliency_scores, dtype=torch.bool)
         gt_mask[gt_bbox[0]:gt_bbox[2], gt_bbox[1]:gt_bbox[3]] = True
 
-        positive_mask = saliency_scores > 0
+        positive_mask = torch.gt(saliency_scores, 0)
         positive_gt_mask = torch.logical_and(positive_mask, gt_mask)
 
         good = positive_gt_mask.sum().item()
