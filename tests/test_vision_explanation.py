@@ -9,6 +9,7 @@ import os
 import urllib.request as request_file
 
 import vision_explanation_methods.DRISE_runner as dr
+import torchvision.models.detection as d
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from vision_explanation_methods.evaluation.pointing_game import PointingGame
 
@@ -195,6 +196,40 @@ def test_vision_explain_loadmodel():
     for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
 
+    def test_pointing_game(self):
+        """Test calculate_gt_salient_pixel_overlap"""
+        BASE_DIR = "./python/vision_explanation_methods/images/"
+        img_fname = os.path.join(BASE_DIR, "2.jpg")
+
+        # get fasterrcnn model
+        model = d.fasterrcnn_resnet50_fpn(pretrained=True)
+        model.eval()
+        model.to("cuda")
+        detection_model = PytorchDRiseWrapper(model=model,
+                                              number_of_classes=87)
+
+        # find saliency scores for top 20% of salient pixels
+        pg = PointingGame(detection_model)
+        salient_scores = pg.pointing_game(img_fname, 0, .8)
+        gt_bbox = [247, 192, 355, 493]
+
+        overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
+                                                        gt_bbox)
+
+        # calculated salient pixel overlap equals expected brute force
+        good = 0
+        total = 0
+        for iindex, i in enumerate(salient_scores[0]):
+            for jindex, j in enumerate(i):
+                if j > 0:
+                    if (gt_bbox[1] <= iindex <= gt_bbox[3]
+                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                        good += 1
+                    total += 1
+        overlap_check = good/total
+
+        assert round(overlap, 2) == round(overlap_check, 2)
+
 
 def test_vision_explain_evaluation():
     """End to end testing for explanation evaluation."""
@@ -227,7 +262,7 @@ def test_vision_explain_evaluation():
     # check that the saliency map exists and has 3 channels
     assert (len(s) == 3)
 
-    v = pg.calculate_gt_salient_pixel_overlap(s[1], [244, 139, 428, 519])
+    v = pg.calculate_gt_salient_pixel_overlap(s, [244, 139, 428, 519])
 
     # check that this is a percent value
     assert (0 < v < 1)

@@ -5,7 +5,6 @@
 
 from io import BytesIO
 from typing import Any, List
-import copy
 
 import numpy as np
 import requests
@@ -134,7 +133,8 @@ class PointingGame:
             use_pyplot=False
         )
         x, y, width, height = 247, 192, 108, 301
-        rectangle = patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='r', facecolor='none')
+        rectangle = patches.Rectangle((x, y), width, height, linewidth=1,
+                                      edgecolor='r', facecolor='none')
         # Add the rectangle patch to the axes
         ax.add_patch(rectangle)
 
