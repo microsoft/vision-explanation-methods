@@ -197,7 +197,7 @@ def test_vision_explain_loadmodel():
         os.remove(elt)
 
     def test_pointing_game(self):
-        """Test calculate_gt_salient_pixel_overlap"""
+        """Test calculate_gt_salient_pixel_overlap."""
         BASE_DIR = "./python/vision_explanation_methods/images/"
         img_fname = os.path.join(BASE_DIR, "2.jpg")
 
