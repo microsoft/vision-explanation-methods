@@ -196,7 +196,8 @@ def test_vision_explain_loadmodel():
     for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
 
-def test_pointing_game(self):
+
+def test_pointing_game():
     """Test calculate_gt_salient_pixel_overlap."""
     BASE_DIR = "./python/vision_explanation_methods/images/"
     img_fname = os.path.join(BASE_DIR, "2.jpg")
@@ -206,7 +207,7 @@ def test_pointing_game(self):
     model.eval()
     model.to("cuda")
     detection_model = PytorchDRiseWrapper(model=model,
-                                            number_of_classes=87)
+                                          number_of_classes=87)
 
     # find saliency scores for top 20% of salient pixels
     pg = PointingGame(detection_model)
@@ -223,10 +224,10 @@ def test_pointing_game(self):
         for jindex, j in enumerate(i):
             if j > 0:
                 if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                    and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
                     good += 1
             if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                and gt_bbox[0] <= jindex <= gt_bbox[2]):
+               and gt_bbox[0] <= jindex <= gt_bbox[2]):
                 total += 1
     overlap_check = good/total
 
