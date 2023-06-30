@@ -6,6 +6,7 @@
 from io import BytesIO
 from typing import Any, List
 
+import matplotlib.patches as patches
 import numpy as np
 import requests
 import torch
@@ -16,7 +17,6 @@ from ml_wrappers.common.constants import Device
 from ml_wrappers.model.image_model_wrapper import _get_device
 from PIL import Image
 from torch import Tensor
-import matplotlib.patches as patches
 
 from ..explanations import drise
 

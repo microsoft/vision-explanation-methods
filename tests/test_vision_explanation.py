@@ -8,8 +8,8 @@ import logging
 import os
 import urllib.request as request_file
 
-import vision_explanation_methods.DRISE_runner as dr
 import torchvision.models.detection as d
+import vision_explanation_methods.DRISE_runner as dr
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from vision_explanation_methods.evaluation.pointing_game import PointingGame
 
@@ -225,6 +225,8 @@ def test_vision_explain_loadmodel():
                     if (gt_bbox[1] <= iindex <= gt_bbox[3]
                        and gt_bbox[0] <= jindex <= gt_bbox[2]):
                         good += 1
+                if (gt_bbox[1] <= iindex <= gt_bbox[3]
+                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
                     total += 1
         overlap_check = good/total
 
