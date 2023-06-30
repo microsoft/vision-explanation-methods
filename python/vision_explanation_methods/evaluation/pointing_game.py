@@ -146,6 +146,9 @@ class PointingGame:
         """
         Calculate percent of overlap between salient pixels and gt bbox.
 
+        Formula: number of salient pixels in the gt bbox /
+                 number of pixels in the gt bbox
+
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
         :type saliency_scores: List[Tensor]
@@ -163,6 +166,6 @@ class PointingGame:
         positive_mask = torch.gt(saliency_scores, 0)
         positive_gt_mask = torch.logical_and(positive_mask, gt_mask)
         good = torch.count_nonzero(positive_gt_mask)
-        total = torch.count_nonzero(positive_mask)
+        total = torch.count_nonzero(gt_mask)
 
         return torch.div(good, total).item()
