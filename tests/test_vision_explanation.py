@@ -196,41 +196,41 @@ def test_vision_explain_loadmodel():
     for elt in [savepath+"0"+".jpg", savepath2+"0"+".jpg"]:
         os.remove(elt)
 
-    def test_pointing_game(self):
-        """Test calculate_gt_salient_pixel_overlap."""
-        BASE_DIR = "./python/vision_explanation_methods/images/"
-        img_fname = os.path.join(BASE_DIR, "2.jpg")
+def test_pointing_game(self):
+    """Test calculate_gt_salient_pixel_overlap."""
+    BASE_DIR = "./python/vision_explanation_methods/images/"
+    img_fname = os.path.join(BASE_DIR, "2.jpg")
 
-        # get fasterrcnn model
-        model = d.fasterrcnn_resnet50_fpn(pretrained=True)
-        model.eval()
-        model.to("cuda")
-        detection_model = PytorchDRiseWrapper(model=model,
-                                              number_of_classes=87)
+    # get fasterrcnn model
+    model = d.fasterrcnn_resnet50_fpn(pretrained=True)
+    model.eval()
+    model.to("cuda")
+    detection_model = PytorchDRiseWrapper(model=model,
+                                            number_of_classes=87)
 
-        # find saliency scores for top 20% of salient pixels
-        pg = PointingGame(detection_model)
-        salient_scores = pg.pointing_game(img_fname, 0, .8)
-        gt_bbox = [247, 192, 355, 493]
+    # find saliency scores for top 20% of salient pixels
+    pg = PointingGame(detection_model)
+    salient_scores = pg.pointing_game(img_fname, 0, .8)
+    gt_bbox = [247, 192, 355, 493]
 
-        overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
-                                                        gt_bbox)
+    overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
+                                                    gt_bbox)
 
-        # calculated salient pixel overlap equals expected brute force
-        good = 0
-        total = 0
-        for iindex, i in enumerate(salient_scores[0]):
-            for jindex, j in enumerate(i):
-                if j > 0:
-                    if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
-                        good += 1
+    # calculated salient pixel overlap equals expected brute force
+    good = 0
+    total = 0
+    for iindex, i in enumerate(salient_scores[0]):
+        for jindex, j in enumerate(i):
+            if j > 0:
                 if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
-                    total += 1
-        overlap_check = good/total
+                    and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                    good += 1
+            if (gt_bbox[1] <= iindex <= gt_bbox[3]
+                and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                total += 1
+    overlap_check = good/total
 
-        assert round(overlap, 2) == round(overlap_check, 2)
+    assert round(overlap, 2) == round(overlap_check, 2)
 
 
 def test_vision_explain_evaluation():
@@ -258,7 +258,7 @@ def test_vision_explain_evaluation():
     # find saliency scores for top 20% of salient pixels
     # do this for the second object in an image
     pg = PointingGame(detection_model)
-    index = 1
+    index = 0
     s = pg.pointing_game(imgpath, index)
 
     # check that the saliency map exists and has 3 channels
