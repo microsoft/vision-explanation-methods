@@ -264,6 +264,7 @@ def test_vision_explain_evaluation():
     # check that the saliency map exists and has 3 channels
     assert (len(s) == 3)
 
+    # calculate overlap
     v = pg.calculate_gt_salient_pixel_overlap(s, [244, 139, 428, 519])
 
     # check that this is a percent value
