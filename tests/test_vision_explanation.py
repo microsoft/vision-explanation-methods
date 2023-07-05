@@ -6,9 +6,9 @@
 
 import logging
 import os
-import pytest
 import urllib.request as request_file
 
+import pytest
 import torchvision.models.detection as d
 import vision_explanation_methods.DRISE_runner as dr
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
@@ -203,7 +203,8 @@ def test_vision_explain_loadmodel():
 class TestPointingGame(object):
     """Testing error_labeling.py."""
 
-    @pytest.mark.parametrize(("pred_y", "true_y", "iou_threshold", "result"), [
+    @pytest.mark.parametrize(("img_fname", "gt_bbox",
+                              "threshold", "num_masks"), [
         # correct instance, prediction exactly the same
 
         # 1 object in the image
@@ -230,10 +231,10 @@ class TestPointingGame(object):
          .8,
          -100),
     ])
-    def test_pointing_game(img_fname=str,
-                           gt_bbox=list,
-                           threshold=float,
-                           num_masks=int):
+    def test_pointing_game(img_fname,
+                           gt_bbox,
+                           threshold,
+                           num_masks):
         """
         Test calculate_gt_salient_pixel_overlap.
 
