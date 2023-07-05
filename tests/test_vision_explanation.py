@@ -231,10 +231,24 @@ class TestPointingGame(object):
          -100),
     ])
     def test_pointing_game(img_fname=str,
-                           gt_bbox="list"[int],
+                           gt_bbox=list,
                            threshold=float,
                            num_masks=int):
-        """Test calculate_gt_salient_pixel_overlap."""
+        """
+        Test calculate_gt_salient_pixel_overlap.
+
+        :param img_fname: Path of the image location
+        :type img_fname: str
+        :param gt_bbox: 4 ints representing the x, y, width, height of ground
+            truth bounding box
+        :type gt_bbox: list of ints
+        :param threshold: threshold between 0 and 1 to determine saliency of a
+            pixel. If saliency score is below the threshold, then the score is
+            set to -1
+        :type threshold: float
+        :param num_masks: number of masks to run drise with
+        :type num_masks: int
+        """
         # get fasterrcnn model
         model = d.fasterrcnn_resnet50_fpn(pretrained=True)
         model.eval()
