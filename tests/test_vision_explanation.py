@@ -205,7 +205,7 @@ def test_pointing_game():
     # get fasterrcnn model
     model = d.fasterrcnn_resnet50_fpn(pretrained=True)
     model.eval()
-    model.to("cuda")
+    model.to('cuda' if torch.cuda.is_available() else 'cpu')
     detection_model = PytorchDRiseWrapper(model=model,
                                           number_of_classes=87)
 
