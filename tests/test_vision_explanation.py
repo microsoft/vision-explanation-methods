@@ -35,6 +35,7 @@ except ImportError:
 
 BASE_DIR = "./python/vision_explanation_methods/images/"
 
+
 def download_assets(filepath, force=False):
     """Download Faster R-CNN model."""
     if force or not os.path.exists(filepath):
