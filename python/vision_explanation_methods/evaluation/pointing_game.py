@@ -20,6 +20,8 @@ from torch import Tensor
 
 from ..explanations import drise
 
+NUM_MASKS = 100
+
 
 class PointingGame:
     """A class for the high energy pointing game."""
@@ -28,6 +30,8 @@ class PointingGame:
                  model: Any,
                  device=Device.AUTO.value) -> None:
         """Initialize the PointingGame.
+
+        Note: gt = ground truth.
 
         :param model: mlflow model
         :type model: Any
@@ -42,7 +46,7 @@ class PointingGame:
                       imagelocation: str,
                       index: int,
                       threshold: float = .8,
-                      num_masks: int = 300):
+                      num_masks: int = NUM_MASKS):
         """
         Calculate the saliency scores for a given object detection prediction.
 
@@ -68,6 +72,12 @@ class PointingGame:
         :return: 2d matrix of highly salient pixels
         :rtype: List[Tensor]
         """
+        if not 0 <= threshold <= 1:
+            raise ValueError('Threshold parameter not a float \
+                             between 0 and 1.')
+        if not 0 < num_masks:
+            raise ValueError('Number of masks parameter not a \
+                             positive int.')
         image_open_pointer = imagelocation
         if (imagelocation.startswith("http://")
            or imagelocation.startswith("https://")):
