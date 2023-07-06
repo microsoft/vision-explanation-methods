@@ -270,8 +270,9 @@ class TestPointingGame(object):
                                                   0,
                                                   threshold=threshold,
                                                   num_masks=num_masks)
+                return
 
-        if not num_masks > 0:
+        elif not num_masks > 0:
             with pytest.raises(
                     ValueError,
                     match='Number of masks parameter not a \
@@ -280,28 +281,30 @@ class TestPointingGame(object):
                                                   0,
                                                   threshold=threshold,
                                                   num_masks=num_masks)
+                return
 
-        salient_scores = pg.pointing_game(img_fname,
-                                          0,
-                                          threshold=threshold,
-                                          num_masks=num_masks)
-        overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
-                                                        gt_bbox)
+        else:
+            salient_scores = pg.pointing_game(img_fname,
+                                              0,
+                                              threshold=threshold,
+                                              num_masks=num_masks)
+            overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
+                                                            gt_bbox)
 
-        # calculated salient pixel overlap equals expected brute force
-        good = 0
-        total = 0
-        for iindex, i in enumerate(salient_scores[0]):
-            for jindex, j in enumerate(i):
-                if (j > 0 and gt_bbox[1] <= iindex <= gt_bbox[3]
-                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
-                    good += 1
-                if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
-                    total += 1
-        overlap_check = good / total
+            # calculated salient pixel overlap equals expected brute force
+            good = 0
+            total = 0
+            for iindex, i in enumerate(salient_scores[0]):
+                for jindex, j in enumerate(i):
+                    if (j > 0 and gt_bbox[1] <= iindex <= gt_bbox[3]
+                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                        good += 1
+                    if (gt_bbox[1] <= iindex <= gt_bbox[3]
+                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                        total += 1
+            overlap_check = good / total
 
-        assert round(overlap, 2) == round(overlap_check, 2)
+            assert round(overlap, 2) == round(overlap_check, 2)
 
     def test_vision_explain_evaluation(self):
         """End to end testing for explanation evaluation."""
