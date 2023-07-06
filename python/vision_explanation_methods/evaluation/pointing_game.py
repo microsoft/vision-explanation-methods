@@ -114,7 +114,8 @@ class PointingGame:
 
     def visualize_highly_salient_pixels(self,
                                         img,
-                                        saliency_scores):
+                                        saliency_scores,
+                                        gt_bbox: List = None):
         """
         Create figure of highly salient pixels.
 
@@ -123,6 +124,9 @@ class PointingGame:
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
         :type saliency_scores: List[Tensor]
+        :param gt_bbox: bounding box for ground truth prediction. if none
+            then no ground truth bounding box is drawn
+        :type gt_bbox: List
         :return: Overlay of the saliency scores on top of the image
         :rtype: Figure
         """
@@ -142,11 +146,12 @@ class PointingGame:
             plt_fig_axis=(fig, ax),
             use_pyplot=False
         )
-        x, y, width, height = 247, 192, 108, 301
-        rectangle = patches.Rectangle((x, y), width, height, linewidth=1,
-                                      edgecolor='r', facecolor='none')
-        # Add the rectangle patch to the axes
-        ax.add_patch(rectangle)
+        if gt_bbox is not None:
+            x, y, width, height = gt_bbox
+            rectangle = patches.Rectangle((x, y), width, height, linewidth=1,
+                                          edgecolor='r', facecolor='none')
+            # Add the rectangle patch to the axes
+            ax.add_patch(rectangle)
 
         return fig
 

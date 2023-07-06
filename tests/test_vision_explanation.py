@@ -231,7 +231,8 @@ class TestPointingGame(object):
          .8,
          -100),
     ])
-    def test_pointing_game(img_fname,
+    def test_pointing_game(self,
+                           img_fname,
                            gt_bbox,
                            threshold,
                            num_masks):
@@ -292,10 +293,9 @@ class TestPointingGame(object):
         total = 0
         for iindex, i in enumerate(salient_scores[0]):
             for jindex, j in enumerate(i):
-                if j > 0:
-                    if (gt_bbox[1] <= iindex <= gt_bbox[3]
-                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
-                        good += 1
+                if (j > 0 and gt_bbox[1] <= iindex <= gt_bbox[3]
+                   and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                    good += 1
                 if (gt_bbox[1] <= iindex <= gt_bbox[3]
                    and gt_bbox[0] <= jindex <= gt_bbox[2]):
                     total += 1
