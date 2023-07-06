@@ -270,7 +270,6 @@ class TestPointingGame(object):
                                                   0,
                                                   threshold=threshold,
                                                   num_masks=num_masks)
-                return
 
         elif not num_masks > 0:
             with pytest.raises(
@@ -281,7 +280,6 @@ class TestPointingGame(object):
                                                   0,
                                                   threshold=threshold,
                                                   num_masks=num_masks)
-                return
 
         else:
             salient_scores = pg.pointing_game(img_fname,
