@@ -329,7 +329,7 @@ class TestPointingGame(object):
         # find saliency scores for top 20% of salient pixels
         # do this for the second object in an image
         pg = PointingGame(detection_model)
-        index = 0
+        index = 1
         s = pg.pointing_game(imgpath, index)
 
         # check that the saliency map exists and has 3 channels
