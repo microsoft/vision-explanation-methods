@@ -332,7 +332,7 @@ class TestPointingGame(object):
         s = pg.pointing_game(imgpath, index)
 
         # check that the saliency map exists and has 3 channels
-        assert (len(s) == 3)
+        assert len(s) == 3
 
         # calculate overlap
         v = pg.calculate_gt_salient_pixel_overlap(s, [244, 139, 428, 519])
