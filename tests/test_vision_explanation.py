@@ -303,7 +303,7 @@ class TestPointingGame(object):
 
         assert round(overlap, 2) == round(overlap_check, 2)
 
-    def test_vision_explain_evaluation():
+    def test_vision_explain_evaluation(self):
         """End to end testing for explanation evaluation."""
         # pointing game run
         imgpath = os.path.join('python', 'vision_explanation_methods',
