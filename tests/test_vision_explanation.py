@@ -338,4 +338,4 @@ class TestPointingGame(object):
         v = pg.calculate_gt_salient_pixel_overlap(s, [244, 139, 428, 519])
 
         # check that this is a percent value
-        assert (0 < v < 1)
+        assert 0 < v < 1
