@@ -299,7 +299,7 @@ class TestPointingGame(object):
                 if (gt_bbox[1] <= iindex <= gt_bbox[3]
                    and gt_bbox[0] <= jindex <= gt_bbox[2]):
                     total += 1
-        overlap_check = good/total
+        overlap_check = good / total
 
         assert round(overlap, 2) == round(overlap_check, 2)
 
