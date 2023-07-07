@@ -73,7 +73,7 @@ class PointingGame:
         :rtype: List[Tensor]
         """
         if not 0 <= threshold <= 1:
-            raise ValueError('Threshold parameter not a float \
+            raise ValueError('Threshold parameter must be a float \
                              between 0 and 1.')
         if num_masks < 0:
             raise ValueError('Number of masks parameter must be a \
