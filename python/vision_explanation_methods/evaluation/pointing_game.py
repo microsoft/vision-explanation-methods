@@ -76,7 +76,7 @@ class PointingGame:
             raise ValueError('Threshold parameter not a float \
                              between 0 and 1.')
         if num_masks < 0:
-            raise ValueError('Number of masks parameter not a \
+            raise ValueError('Number of masks parameter must be a \
                              positive int.')
         image_open_pointer = imagelocation
         if (imagelocation.startswith("http://")
