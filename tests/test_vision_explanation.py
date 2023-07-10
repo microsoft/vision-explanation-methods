@@ -274,7 +274,7 @@ class TestPointingGame(object):
         elif not num_masks > 0:
             with pytest.raises(
                     ValueError,
-                    match='Number of masks parameter not a \
+                    match='Number of masks parameter must be a \
                              positive int.'):
                 salient_scores = pg.pointing_game(img_fname,
                                                   0,
