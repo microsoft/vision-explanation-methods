@@ -264,7 +264,7 @@ class TestPointingGame(object):
         if not 0 <= threshold <= 1:
             with pytest.raises(
                     ValueError,
-                    match='Threshold parameter not a float \
+                    match='Threshold parameter must be a float \
                              between 0 and 1.'):
                 salient_scores = pg.pointing_game(img_fname,
                                                   0,
