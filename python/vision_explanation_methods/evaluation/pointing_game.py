@@ -6,6 +6,7 @@
 from io import BytesIO
 from typing import Any, List
 
+import matplotlib.patches as patches
 import numpy as np
 import requests
 import torch
@@ -19,6 +20,8 @@ from torch import Tensor
 
 from ..explanations import drise
 
+NUM_MASKS = 100
+
 
 class PointingGame:
     """A class for the high energy pointing game."""
@@ -27,6 +30,8 @@ class PointingGame:
                  model: Any,
                  device=Device.AUTO.value) -> None:
         """Initialize the PointingGame.
+
+        Note: gt = ground truth.
 
         :param model: mlflow model
         :type model: Any
@@ -41,7 +46,7 @@ class PointingGame:
                       imagelocation: str,
                       index: int,
                       threshold: float = .8,
-                      num_masks: int = 100):
+                      num_masks: int = NUM_MASKS):
         """
         Calculate the saliency scores for a given object detection prediction.
 
@@ -67,6 +72,12 @@ class PointingGame:
         :return: 2d matrix of highly salient pixels
         :rtype: List[Tensor]
         """
+        if not 0 <= threshold <= 1:
+            raise ValueError('Threshold parameter must be a float \
+                             between 0 and 1.')
+        if num_masks < 0:
+            raise ValueError('Number of masks parameter must be a \
+                             positive int.')
         image_open_pointer = imagelocation
         if (imagelocation.startswith("http://")
            or imagelocation.startswith("https://")):
@@ -98,13 +109,13 @@ class PointingGame:
             )
 
         temp = saliency_scores[0][index]['detection']
-
         temp[temp < threshold] = -1
         return temp
 
     def visualize_highly_salient_pixels(self,
                                         img,
-                                        saliency_scores):
+                                        saliency_scores,
+                                        gt_bbox: List = None):
         """
         Create figure of highly salient pixels.
 
@@ -113,9 +124,13 @@ class PointingGame:
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
         :type saliency_scores: List[Tensor]
+        :param gt_bbox: bounding box for ground truth prediction. if none
+            then no ground truth bounding box is drawn
+        :type gt_bbox: List
         :return: Overlay of the saliency scores on top of the image
         :rtype: Figure
         """
+        pl.clf()
         fig, ax = pl.subplots(1, 1, figsize=(10, 10))
 
         viz.visualize_image_attr(
@@ -131,6 +146,12 @@ class PointingGame:
             plt_fig_axis=(fig, ax),
             use_pyplot=False
         )
+        if gt_bbox is not None:
+            x, y, width, height = gt_bbox
+            rectangle = patches.Rectangle((x, y), width, height, linewidth=1,
+                                          edgecolor='r', facecolor='none')
+            # Add the rectangle patch to the axes
+            ax.add_patch(rectangle)
 
         return fig
 
@@ -140,6 +161,9 @@ class PointingGame:
         """
         Calculate percent of overlap between salient pixels and gt bbox.
 
+        Formula: number of salient pixels in the gt bbox /
+                 number of pixels in the gt bbox
+
         :param saliency_scores: 2D matrix representing the saliency scores
             of each pixel in an image
         :type saliency_scores: List[Tensor]
@@ -148,15 +172,15 @@ class PointingGame:
         :return: return percent of salient pixel overlap with the ground truth
         :rtype: Float
         """
-        saliency_scores = torch.tensor(saliency_scores)
+        saliency_scores = torch.tensor(saliency_scores)[0]
         gt_bbox = torch.tensor(gt_bbox)
 
         gt_mask = torch.zeros_like(saliency_scores, dtype=torch.bool)
-        gt_mask[gt_bbox[0]:gt_bbox[2], gt_bbox[1]:gt_bbox[3]] = True
+        gt_mask[gt_bbox[1]:gt_bbox[3]+1, gt_bbox[0]:gt_bbox[2]+1] = True
 
         positive_mask = torch.gt(saliency_scores, 0)
         positive_gt_mask = torch.logical_and(positive_mask, gt_mask)
-        good = positive_gt_mask.sum()
-        total = positive_mask.sum()
+        good = torch.count_nonzero(positive_gt_mask)
+        total = torch.count_nonzero(gt_mask)
 
         return torch.div(good, total).item()

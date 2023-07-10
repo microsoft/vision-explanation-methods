@@ -8,6 +8,8 @@ import logging
 import os
 import urllib.request as request_file
 
+import pytest
+import torchvision.models.detection as d
 import vision_explanation_methods.DRISE_runner as dr
 from ml_wrappers.model.image_model_wrapper import PytorchDRiseWrapper
 from vision_explanation_methods.evaluation.pointing_game import PointingGame
@@ -30,6 +32,8 @@ except ImportError:
 
 # execute tests from the root folder as follows:
 # pytest tests/test_vision_explanation.py
+
+BASE_DIR = "./python/vision_explanation_methods/images/"
 
 
 def download_assets(filepath, force=False):
@@ -196,38 +200,143 @@ def test_vision_explain_loadmodel():
         os.remove(elt)
 
 
-def test_vision_explain_evaluation():
-    """End to end testing for explanation evaluation."""
-    # pointing game run
-    imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
-                           '128.jpg')
-    # load fastrcnn model
-    modelpath = os.path.join('python', 'vision_explanation_methods', 'models',
-                             'fastrcnn.pt')
-    # save tested result in res
+class TestPointingGame(object):
+    """Testing error_labeling.py."""
 
-    # use helper function from above to fetch model
-    _ = download_assets(modelpath)
+    @pytest.mark.parametrize(("img_fname", "gt_bbox",
+                              "threshold", "num_masks"), [
+        # correct instance, prediction exactly the same
 
-    # run the main function for saliency map generation
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = _get_instance_segmentation_model(5)
-    model.load_state_dict(torch.load(modelpath, device))
-    model.to(device)
-    model.eval()
-    detection_model = PytorchDRiseWrapper(model=model,
-                                          number_of_classes=1000)
+        # 1 object in the image
+        (os.path.join(BASE_DIR, "2.jpg"),
+         [247, 192, 355, 493],
+         .8,
+         100),
 
-    # find saliency scores for top 20% of salient pixels
-    # do this for the second object in an image
-    pg = PointingGame(detection_model)
-    index = 1
-    s = pg.pointing_game(imgpath, index)
+        # multiple objects in the image (test defaults to first)
+        (os.path.join(BASE_DIR, "128.jpg"),
+         [134, 257, 222, 415],
+         .8,
+         100),
 
-    # check that the saliency map exists and has 3 channels
-    assert (len(s) == 3)
+        # Invalid threshold
+        (os.path.join(BASE_DIR, "2.jpg"),
+         [247, 192, 355, 493],
+         -10,
+         100),
 
-    v = pg.calculate_gt_salient_pixel_overlap(s[1], [244, 139, 428, 519])
+        # Invalid nummasks
+        (os.path.join(BASE_DIR, "2.jpg"),
+         [247, 192, 355, 493],
+         .8,
+         -100),
+    ])
+    def test_pointing_game(self,
+                           img_fname,
+                           gt_bbox,
+                           threshold,
+                           num_masks):
+        """
+        Test calculate_gt_salient_pixel_overlap.
 
-    # check that this is a percent value
-    assert (0 < v < 1)
+        :param img_fname: Path of the image location
+        :type img_fname: str
+        :param gt_bbox: 4 ints representing the x, y, width, height of ground
+            truth bounding box
+        :type gt_bbox: list of ints
+        :param threshold: threshold between 0 and 1 to determine saliency of a
+            pixel. If saliency score is below the threshold, then the score is
+            set to -1
+        :type threshold: float
+        :param num_masks: number of masks to run drise with
+        :type num_masks: int
+        """
+        # get fasterrcnn model
+        model = d.fasterrcnn_resnet50_fpn(pretrained=True)
+        model.eval()
+        model.to('cuda' if torch.cuda.is_available() else 'cpu')
+        detection_model = PytorchDRiseWrapper(model=model,
+                                              number_of_classes=87)
+
+        # find saliency scores for top 20% of salient pixels
+        pg = PointingGame(detection_model)
+
+        if not 0 <= threshold <= 1:
+            with pytest.raises(
+                    ValueError,
+                    match='Threshold parameter must be a float \
+                             between 0 and 1.'):
+                salient_scores = pg.pointing_game(img_fname,
+                                                  0,
+                                                  threshold=threshold,
+                                                  num_masks=num_masks)
+
+        elif not num_masks > 0:
+            with pytest.raises(
+                    ValueError,
+                    match='Number of masks parameter must be a \
+                             positive int.'):
+                salient_scores = pg.pointing_game(img_fname,
+                                                  0,
+                                                  threshold=threshold,
+                                                  num_masks=num_masks)
+
+        else:
+            salient_scores = pg.pointing_game(img_fname,
+                                              0,
+                                              threshold=threshold,
+                                              num_masks=num_masks)
+            overlap = pg.calculate_gt_salient_pixel_overlap(salient_scores,
+                                                            gt_bbox)
+
+            # calculated salient pixel overlap equals expected brute force
+            good = 0
+            total = 0
+            for iindex, i in enumerate(salient_scores[0]):
+                for jindex, j in enumerate(i):
+                    if (j > 0 and gt_bbox[1] <= iindex <= gt_bbox[3]
+                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                        good += 1
+                    if (gt_bbox[1] <= iindex <= gt_bbox[3]
+                       and gt_bbox[0] <= jindex <= gt_bbox[2]):
+                        total += 1
+            overlap_check = good / total
+
+            assert round(overlap, 2) == round(overlap_check, 2)
+
+    def test_vision_explain_evaluation(self):
+        """End to end testing for explanation evaluation."""
+        # pointing game run
+        imgpath = os.path.join('python', 'vision_explanation_methods',
+                               'images', '128.jpg')
+        # load fastrcnn model
+        modelpath = os.path.join('python', 'vision_explanation_methods',
+                                 'models', 'fastrcnn.pt')
+        # save tested result in res
+
+        # use helper function from above to fetch model
+        _ = download_assets(modelpath)
+
+        # run the main function for saliency map generation
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model = _get_instance_segmentation_model(5)
+        model.load_state_dict(torch.load(modelpath, device))
+        model.to(device)
+        model.eval()
+        detection_model = PytorchDRiseWrapper(model=model,
+                                              number_of_classes=1000)
+
+        # find saliency scores for top 20% of salient pixels
+        # do this for the second object in an image
+        pg = PointingGame(detection_model)
+        index = 1
+        s = pg.pointing_game(imgpath, index)
+
+        # check that the saliency map exists and has 3 channels
+        assert len(s) == 3
+
+        # calculate overlap
+        v = pg.calculate_gt_salient_pixel_overlap(s, [244, 139, 428, 519])
+
+        # check that this is a percent value
+        assert 0 < v < 1
