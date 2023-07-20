@@ -121,6 +121,13 @@ class TestErrorLabelingManager(object):
          [[44, 6, 6, 1, 1, 0]],
          .5,
          np.array([ErrorLabelType.BACKGROUND])),
+
+        # one pred matches to multiple ground truths
+        ([[44, 5, 5, 10, 10, 0]],
+         [[44, 5, 5, 9, 10, 0], [44, 5, 5, 10, 10, 0]],
+         .5,
+         np.array([[ErrorLabelType.DUPLICATE_DETECTION],
+                   [ErrorLabelType.MATCH]])),
     ])
     def test_object_detection_image_labeling(self,
                                              pred_y,

@@ -130,6 +130,30 @@ class ErrorLabeling():
                         # scores as the first step)
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.DUPLICATE_DETECTION)
+                    elif (ErrorLabelType.MATCH in
+                          match_matrix.T[detect_index]):
+                        # class name and bbox correct, but there is already a
+                        # match in the same column of the matrix. In this
+                        # scenario we prioritize the match with the highest
+                        # IOU score (to stay consistent with object detection
+                        # norms)
+                        match_index = (np.where(match_matrix.T[detect_index] ==
+                                                ErrorLabelType.MATCH))[0][0]
+                        prev_iou_score = torchvision.ops.box_iou(
+                            Tensor(detect[1:5]).unsqueeze(0).view(-1, 4),
+                            (Tensor(self._true_y[match_index][1:5])
+                             .unsqueeze(0).view(-1, 4)))
+                        if prev_iou_score < iou_score:
+                            match_matrix[match_index][detect_index] = (
+                                    ErrorLabelType.DUPLICATE_DETECTION)
+                            # if (ErrorLabelType.DUPLICATE_DETECTION in
+                            #         match_matrix[gt_index]):
+                            #     index = np.where(match_matrix[gt_index] ==
+                            #                      ErrorLabelType.DUPLICATE_DETECTION)[0][0]
+                            #     match_matrix[index][detect_index] = (
+                            #         ErrorLabelType.MATCH)
+                            match_matrix[gt_index][detect_index] = (
+                                ErrorLabelType.MATCH)
                     else:
                         # this means bboxes overlap, class names = (1st time)
                         match_matrix[gt_index][detect_index] = (
@@ -143,6 +167,13 @@ class ErrorLabeling():
                         # the bboxes don't line up, but the labels are correct
                         match_matrix[gt_index][detect_index] = (
                             ErrorLabelType.LOCALIZATION)
+
+        for i in range(len(match_matrix)):
+            for j in range(len(match_matrix[i])):
+                if (match_matrix[i][j] is ErrorLabelType.DUPLICATE_DETECTION
+                   and ErrorLabelType.MATCH not in match_matrix[i] and
+                   ErrorLabelType.MATCH not in match_matrix.T[j]):
+                    match_matrix[i][j] = ErrorLabelType.MATCH
 
         # resort the columns (so no longer ordered by descending conf
         # scores)
