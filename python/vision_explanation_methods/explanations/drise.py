@@ -69,14 +69,19 @@ class MaskAffinityRecord:
         :type device: String
         """
         self.mask = self.mask.to(device)
+        device_affinity_scores = []
         for score in self.affinity_scores:
+            # note: this does not update the original list
             score = score.to(device)
+            device_affinity_scores.append(score)
+        self.affinity_scores = device_affinity_scores
 
 
 def generate_mask(
         base_size: Tuple[int, int],
         img_size: Tuple[int, int],
-        padding: int = 30
+        padding: int,
+        device: str,
 ) -> torch.Tensor:
     """Create a random mask for image occlusion.
 
@@ -84,13 +89,15 @@ def generate_mask(
     :type base_size: Tuple (int, int)
     :param img_size: Size of image to be masked (hxw)
     :type img_size: Tuple (int, int)
-    :param padding: (optional) Amount to offset mask (default 30 pixels)
+    :param padding: Amount to offset mask
     :type padding: int
+    :param device: Torch string describing device, e.g. 'cpu' or 'cuda:0'
+    :type device: String
     :return: Occlusion mask for image, same shape as image
     :rtype: Tensor
     """
     # Needs to be float for resize interpolation
-    base_mask = 1.0 * torch.randint(0, 2, base_size)
+    base_mask = 1.0 * torch.randint(0, 2, base_size, device=device)
     mask = base_mask.repeat([3, 1, 1])
     resized_mask = T.Resize(
         (img_size[0] + padding, img_size[1] + padding),
@@ -136,13 +143,16 @@ def compute_affinity_scores(
 
 def saliency_fusion(
         affinity_records: List[MaskAffinityRecord],
+        device: str,
         normalize: Optional[bool] = True,
         verbose: bool = False
 ) -> torch.Tensor:
     """Create a fused mask based on the affinity scores of the different masks.
 
     :param affinity_records: List of affinity records computed for mask
-    :type scores_and_masks: List of affinity records
+    :type affinity_records: List of affinity records
+    :param device: Torch string describing device, e.g. 'cpu' or 'cuda:0'
+    :type device: String
     :param normalize: Normalize the image by subtracting off the average
         affinity score (optional), defaults to true
     :type: bool
@@ -160,7 +170,6 @@ def saliency_fusion(
         else affinity_records[1:]
 
     for affinity_record in records_iterator:
-
         try:
             unweighted_mask_accum += affinity_record.mask
             affinity_scores = affinity_record.affinity_scores
@@ -177,8 +186,9 @@ def saliency_fusion(
         except RuntimeError:
             continue
 
+    num_affinity_records = len(affinity_records)
     for scores in average_scores_accum:
-        scores /= len(affinity_records)
+        scores /= num_affinity_records
 
     if normalize:
         for average_score, weighted_mask in zip(average_scores_accum,
@@ -230,7 +240,6 @@ def DRISE_saliency(
     :rtype: List torch.Tensor
     """
     img_size = image_tensor.shape[-2:]
-
     if mask_padding is None:
         mask_padding = int(max(
             img_size[0] / mask_res[0], img_size[1] / mask_res[1]))
@@ -241,38 +250,37 @@ def DRISE_saliency(
         else range(number_of_masks)
 
     for _ in mask_iterator:
-
-        mask = generate_mask(mask_res, img_size, mask_padding)
-        masked_image = fuse_mask(image_tensor.to(device), mask.to(device))
+        mask = generate_mask(mask_res, img_size, mask_padding, device)
+        masked_image = fuse_mask(image_tensor, mask)
         with torch.no_grad():
             masked_detections = model.predict(masked_image)
-
         affinity_scores = []
 
         for (target_detection, masked_detection) in zip(target_detections,
                                                         masked_detections):
             affinity_scores.append(
-                compute_affinity_scores(target_detection, masked_detection))
-
+                compute_affinity_scores(target_detection,
+                                        masked_detection).detach().to("cpu"))
         mask_records.append(MaskAffinityRecord(
             mask=mask.to("cpu"),
-            affinity_scores=[s.detach().to("cpu") for s in affinity_scores])
+            affinity_scores=affinity_scores)
         )
+    return saliency_fusion(mask_records, device, verbose=verbose)
 
-    return saliency_fusion(mask_records, verbose=verbose)
 
-
-def convert_base64_to_tensor(b64_img: str) -> Tensor:
+def convert_base64_to_tensor(b64_img: str, device: str) -> Tensor:
     """Convert base64 image to tensor.
 
     :param b64_img: Base64 encoded image
     :type b64_img: str
+    :param device: Torch string describing device, e.g. "cpu" or "cuda:0"
+    :type device: str
     :return: Image tensor
     :rtype: Tensor
     """
     base64_decoded = base64.b64decode(b64_img)
     image = Image.open(io.BytesIO(base64_decoded))
-    img_tens = T.ToTensor()(image)
+    img_tens = T.ToTensor()(image).to(device)
     return img_tens
 
 
@@ -343,13 +351,13 @@ def DRISE_saliency_for_mlflow(
         # Converts image base64 to a tensor
         # Fuses mask tensor with image tensor
         # Converts fused image tensor to base64
-        mask = generate_mask(mask_res, img_size, mask_padding)
+        mask = generate_mask(mask_res, img_size, mask_padding, device)
 
         # Currently only supports single image
         img_tens = convert_base64_to_tensor(
-            image_tensor.loc[0, 'image'])
+            image_tensor.loc[0, 'image'], device)
 
-        masked_image = fuse_mask(img_tens.to(device), mask.to(device))
+        masked_image = fuse_mask(img_tens, mask)
 
         masked_image_str, masked_image_size = convert_tensor_to_base64(
             masked_image)
@@ -371,4 +379,4 @@ def DRISE_saliency_for_mlflow(
             mask=mask.detach().cpu(),
             affinity_scores=[s.detach().cpu() for s in affinity_scores])
         )
-    return saliency_fusion(mask_records, verbose=verbose)
+    return saliency_fusion(mask_records, device, verbose=verbose)
