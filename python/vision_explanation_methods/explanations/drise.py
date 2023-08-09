@@ -347,15 +347,15 @@ def DRISE_saliency_for_mlflow(
     mask_iterator = tqdm.tqdm(range(number_of_masks)) if verbose \
         else range(number_of_masks)
 
+    # Currently only supports single image
+    img_tens = convert_base64_to_tensor(
+        image_tensor.loc[0, 'image'], device)
+
     for _ in mask_iterator:
         # Converts image base64 to a tensor
         # Fuses mask tensor with image tensor
         # Converts fused image tensor to base64
         mask = generate_mask(mask_res, img_size, mask_padding, device)
-
-        # Currently only supports single image
-        img_tens = convert_base64_to_tensor(
-            image_tensor.loc[0, 'image'], device)
 
         masked_image = fuse_mask(img_tens, mask)
 
