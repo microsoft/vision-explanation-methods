@@ -160,8 +160,12 @@ def get_drise_saliency_map(
             verbose=True  # Turns progress bar on/off.
         )
     else:
-        img_input = T.ToTensor()(test_image).unsqueeze(0).to(device)
-
+        img_input = test_image
+        if hasattr(model, "transforms") and model.transforms is not None:
+            img_input = model.transforms(img_input)
+        if not torch.is_tensor(img_input):
+            img_input = T.ToTensor()(img_input)
+        img_input = img_input.unsqueeze(0).to(device)
         detections = model.predict(img_input)
 
         saliency_scores = drise.DRISE_saliency(

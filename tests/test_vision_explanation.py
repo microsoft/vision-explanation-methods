@@ -34,6 +34,8 @@ except ImportError:
 # pytest tests/test_vision_explanation.py
 
 BASE_DIR = "./python/vision_explanation_methods/images/"
+NUM_CLASSES = 5
+TRANSFORM_SIZE = 400
 
 
 def download_assets(filepath, force=False):
@@ -122,7 +124,8 @@ def _get_instance_segmentation_model(num_classes):
     return model
 
 
-def test_vision_explain_loadmodel():
+@pytest.mark.parametrize("use_transforms", [True, False])
+def test_vision_explain_loadmodel(use_transforms):
     """End to end testing for saliency map generation function."""
     # unseen test image
     imgpath = os.path.join('python', 'vision_explanation_methods', 'images',
@@ -139,15 +142,22 @@ def test_vision_explain_loadmodel():
 
     # run the main function for saliency map generation
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = _get_instance_segmentation_model(5)
+    model = _get_instance_segmentation_model(NUM_CLASSES)
     model.load_state_dict(torch.load(modelpath, device))
     model.to(device)
 
+    if use_transforms:
+        resize_transforms = torchvision.transforms.Resize(size=TRANSFORM_SIZE)
+        model = PytorchDRiseWrapper(model=model,
+                                    number_of_classes=NUM_CLASSES,
+                                    transforms=resize_transforms)
+    else:
+        model = PytorchDRiseWrapper(model=model,
+                                    number_of_classes=NUM_CLASSES)
+
     res = dr.get_drise_saliency_map(imagelocation=imgpath,
-                                    model=PytorchDRiseWrapper(
-                                        model=model,
-                                        number_of_classes=5),
-                                    numclasses=5,
+                                    model=model,
+                                    numclasses=NUM_CLASSES,
                                     savename=savepath,
                                     max_figures=2)
 
@@ -174,10 +184,8 @@ def test_vision_explain_loadmodel():
     # run the main function for saliency map generation
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(imagelocation=imgpath2,
-                                     model=PytorchDRiseWrapper(
-                                          model=model,
-                                          number_of_classes=5),
-                                     numclasses=5,
+                                     model=model,
+                                     numclasses=NUM_CLASSES,
                                      savename=savepath2,
                                      max_figures=2)
 
@@ -319,7 +327,7 @@ class TestPointingGame(object):
 
         # run the main function for saliency map generation
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model = _get_instance_segmentation_model(5)
+        model = _get_instance_segmentation_model(NUM_CLASSES)
         model.load_state_dict(torch.load(modelpath, device))
         model.to(device)
         model.eval()
