@@ -23,8 +23,8 @@ class TestErrorLabelingManager(object):
         ([[44, 5, 5, 7, 7, 0], [44, 1, 1, 2, 2, 0]],
          [[44, 5, 5, 7, 7, 0], [44, 1, 1, 2, 2, 0]],
          .5,
-          np.array([[ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND],
-                    [ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH]])),
+         np.array([[ErrorLabelType.MATCH, ErrorLabelType.BACKGROUND],
+                   [ErrorLabelType.BACKGROUND, ErrorLabelType.MATCH]])),
 
         # correct instance, predictions exactly the same for multiple detects
         # order is mixed up
@@ -68,28 +68,32 @@ class TestErrorLabelingManager(object):
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 660, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         np.array([[ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION]])),
+         np.array([[ErrorLabelType.MATCH,
+                    ErrorLabelType.DUPLICATE_DETECTION]])),
 
         # duplicate detection, detections not identical but w/in iou range.
         # same conf score
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         np.array([[ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION]])),
+         np.array([[ErrorLabelType.MATCH,
+                    ErrorLabelType.DUPLICATE_DETECTION]])),
 
         # duplicate detection, detections not identical but w/in iou range.
         # Detection with lower iou has higher conf score
         ([[1, 162, 65, 365, 660, 0], [1, 162, 65, 365, 659, 50]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         np.array([[ErrorLabelType.DUPLICATE_DETECTION, ErrorLabelType.MATCH]])),
+         np.array([[ErrorLabelType.DUPLICATE_DETECTION,
+                    ErrorLabelType.MATCH]])),
 
         # Same as previous, but in a different order to ensure that conf score
         # prioritization is working correctly
         ([[1, 162, 65, 365, 659, 50], [1, 162, 65, 365, 660, 0]],
          [[1, 162, 65, 365, 660, 0]],
          .5,
-         np.array([[ErrorLabelType.MATCH, ErrorLabelType.DUPLICATE_DETECTION]])),
+         np.array([[ErrorLabelType.MATCH,
+                    ErrorLabelType.DUPLICATE_DETECTION]])),
 
         # background error with same class
         ([[1, 50, 50, 100, 100, 0]],
