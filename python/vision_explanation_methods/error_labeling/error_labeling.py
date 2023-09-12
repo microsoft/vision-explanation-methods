@@ -102,8 +102,10 @@ class ErrorLabeling():
         sorted_list = sorted(self._pred_y, key=lambda x: x[-1], reverse=True)
 
         if len(self._true_y) == 0:
-            match_matrix = [[ErrorLabelType.BACKGROUND]
-                            for _ in range(len(self._pred_y))]
+            match_matrix = np.array(
+                [[ErrorLabelType.BACKGROUND]
+                 for _ in range(len(self._pred_y))]
+            )
             return match_matrix
 
         for gt_index, gt in enumerate(self._true_y):
@@ -157,6 +159,9 @@ class ErrorLabeling():
         Note that it is possible to have more errors than actual objects
         in an image (because we account for missing detections and
         duplicate detections).
+
+        :return: list of error labels
+        :rtype: list
         """
         match_matrix = self.compute_error_labels()
         error_arr = self._remove_matches(deepcopy(match_matrix))
