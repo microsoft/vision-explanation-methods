@@ -103,7 +103,8 @@ class ErrorLabeling():
 
         if len(self._true_y) == 0:
             match_matrix = np.array(
-                [[ErrorLabelType.BACKGROUND] * len(self._pred_y)]
+                [[ErrorLabelType.BACKGROUND]
+                 for _ in range(len(self._pred_y))]
             )
             return match_matrix
 

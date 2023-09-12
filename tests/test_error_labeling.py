@@ -113,6 +113,13 @@ class TestErrorLabelingManager(object):
          .5,
          np.array([[ErrorLabelType.BACKGROUND]])),
 
+        # gt is empty with multiple preds
+        ([[0, 1, 1, 20, 20, 0], [1, 21, 21, 26, 26, 0]],
+         [],
+         .5,
+         np.array([[ErrorLabelType.BACKGROUND],
+                   [ErrorLabelType.BACKGROUND]])),
+
         # pred is empty
         ([],
          [[0, 1, 1, 20, 20, 0]],
