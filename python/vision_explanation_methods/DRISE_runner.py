@@ -85,7 +85,7 @@ def get_drise_saliency_map(
         save_name: str,
         num_masks: int = 25,
         mask_res: Tuple[int, int] = (4, 4),
-        model: Optional[object],
+        model: Optional[object] = None,
         num_classes: Optional[int] = 87,
         mask_padding: Optional[int] = None,
         device_choice: Optional[str] = None,
@@ -103,7 +103,8 @@ def get_drise_saliency_map(
     :param model: Input model for D-RISE. If None, Faster R-CNN model
         will be used.
     :type model: PyTorch model
-    :param num_classes: Number of classes model predicted. Defaults to 87 for the pre-trained model.
+    :param num_classes: Number of classes model predicted. Defaults to 87 for
+        the pre-trained model.
     :type num_classes: int
     :param save_name: Path of the saved output figure
     :param mask_padding: How much to pad the mask before cropping
