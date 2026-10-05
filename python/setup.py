@@ -37,11 +37,11 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'numpy<3',
+    'numpy>=1.26,<3',
     'tqdm',
     'matplotlib<3.7.0; python_version < "3.9"',
     'matplotlib>=3.8.4; python_version >= "3.9"',
-    'ml_wrappers'
+    'ml_wrappers>=0.6.0,<0.7'
 ]
 
 with open(README_FILE, 'r', encoding='utf-8') as f:
