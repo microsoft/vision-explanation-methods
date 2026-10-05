@@ -39,8 +39,8 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'numpy',
     'tqdm',
-    # TODO: remove this dependency
-    'matplotlib<3.7.0',
+    'matplotlib<3.7.0; python_version < "3.9"',
+    'matplotlib>=3.8.4; python_version >= "3.9"',
     'ml_wrappers'
 ]
 
