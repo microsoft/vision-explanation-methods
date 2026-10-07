@@ -20,9 +20,9 @@ jobs:
           echo "Only Test or Prod can be used."
           exit 1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2.3.0
         with:
           auto-update-conda: true
           python-version: 3.8
@@ -63,7 +63,7 @@ jobs:
         run: pytest ./tests -s -v
 
       - name: Upload a vision-explanation-methods build result
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2.3.1
         with:
           name: vision_explanation_methods
           path: python/dist/
@@ -71,7 +71,7 @@ jobs:
       # publish to PyPI
       - name: Publish vision-explanation-methods package to Test PyPI
         if: ${{ github.event.inputs.releaseType == 'Test' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_API_TOKEN_VISION_EXPLANATION_METHODS }}
@@ -79,7 +79,7 @@ jobs:
           packages_dir: python/dist/
       - name: Publish vision-explanation-methods package to PyPI
         if: ${{ github.event.inputs.releaseType == 'Prod' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN_VISION_EXPLANATION_METHODS }}
