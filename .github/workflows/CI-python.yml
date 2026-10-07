@@ -21,8 +21,8 @@ jobs:
     runs-on: ${{ matrix.operatingSystem }}
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+    - uses: conda-incubator/setup-miniconda@9f54435e0e72c53962ee863144e47a4b094bfd35 # v2.3.0
       with:
         auto-update-conda: true
         python-version: ${{ matrix.pythonVersion }}
@@ -59,7 +59,7 @@ jobs:
       run: |
         pytest ./tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
     - name: Upload code coverage results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5 # v3.2.1
       with:
         name: ${{ matrix.packageDirectory }}-code-coverage-results
         path: htmlcov
@@ -68,7 +68,7 @@ jobs:
     - if: ${{ (matrix.operatingSystem == 'windows-latest') && (matrix.pythonVersion == '3.8') }}
       name: Upload to codecov
       id: codecovupload1
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # v2.1.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .
@@ -81,7 +81,7 @@ jobs:
     - if: ${{ (steps.codecovupload1.outcome == 'failure') && (matrix.pythonVersion == '3.8') && (matrix.operatingSystem == 'windows-latest') }}
       name: Retry upload to codecov
       id: codecovupload2
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@f32b3a3741e1053eb607407145bc9619351dc93b # v2.1.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .
