@@ -18,6 +18,7 @@ from ml_wrappers.model.image_model_wrapper import _get_device
 from PIL import Image
 from torch import Tensor
 
+from .._visualization import _CaptumAxes
 from ..explanations import drise
 
 NUM_MASKS = 100
@@ -131,7 +132,9 @@ class PointingGame:
         :rtype: Figure
         """
         pl.clf()
-        fig, ax = pl.subplots(1, 1, figsize=(10, 10))
+        fig, ax = pl.subplots(
+            1, 1, figsize=(10, 10),
+            subplot_kw={'axes_class': _CaptumAxes})
 
         viz.visualize_image_attr(
             np.transpose(
@@ -141,7 +144,7 @@ class PointingGame:
             method="blended_heat_map",
             sign="positive",
             show_colorbar=True,
-            cmap=pl.cm.get_cmap("Blues"),
+            cmap=pl.get_cmap("Blues"),
             title="Pointing Game Visualization",
             plt_fig_axis=(fig, ax),
             use_pyplot=False

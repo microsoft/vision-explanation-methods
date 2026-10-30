@@ -19,6 +19,7 @@ from torchvision import transforms as T
 from torchvision.models import detection
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
+from ._visualization import _CaptumAxes
 from .explanations import drise
 
 try:
@@ -201,7 +202,9 @@ def get_drise_saliency_map(
     fig_list = []
     for i in range((max_figures if num_detections > max_figures
                     else num_detections)):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+        fig, ax = plt.subplots(
+            1, 1, figsize=(10, 10),
+            subplot_kw={'axes_class': _CaptumAxes})
         label = int(torch.argmax(detections[img_index].class_scores[i]))
         label_list.append(label)
 

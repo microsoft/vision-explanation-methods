@@ -13,7 +13,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        numpyVersion: ['1.26.4', '2.0.2', '2.2.6']
+        include:
+          - numpyVersion: '1.23.5'
+            matplotlibSpec: 'matplotlib==3.9.0'
+            captumSpec: 'captum==0.5.0'
+          - numpyVersion: '1.26.4'
+            matplotlibSpec: 'matplotlib==3.9.0'
+          - numpyVersion: '2.0.2'
+            matplotlibSpec: 'matplotlib==3.9.0'
+          - numpyVersion: '2.2.6'
+            matplotlibSpec: 'matplotlib'
 
     runs-on: ubuntu-latest
 
@@ -26,8 +35,8 @@ jobs:
     - name: Install package with NumPy ${{ matrix.numpyVersion }}
       run: |
         python -m pip install --upgrade pip
-        pip install "numpy==${{ matrix.numpyVersion }}" -e ./python pytest
-        pip install "numpy==${{ matrix.numpyVersion }}"
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        pip install "numpy==${{ matrix.numpyVersion }}" "${{ matrix.matplotlibSpec }}" "${{ matrix.captumSpec || 'captum' }}" -e ./python pytest requests
 
     - name: Verify dependency consistency
       run: |
@@ -51,8 +60,8 @@ jobs:
     runs-on: ${{ matrix.operatingSystem }}
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         auto-update-conda: true
         python-version: ${{ matrix.pythonVersion }}
@@ -89,16 +98,16 @@ jobs:
       run: |
         pytest ./tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
     - name: Upload code coverage results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.packageDirectory }}-code-coverage-results
+        name: ${{ matrix.packageDirectory }}-${{ matrix.operatingSystem }}-py${{ matrix.pythonVersion }}-code-coverage-results
         path: htmlcov
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
     - if: ${{ (matrix.operatingSystem == 'windows-latest') && (matrix.pythonVersion == '3.8') }}
       name: Upload to codecov
       id: codecovupload1
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .
@@ -111,7 +120,7 @@ jobs:
     - if: ${{ (steps.codecovupload1.outcome == 'failure') && (matrix.pythonVersion == '3.8') && (matrix.operatingSystem == 'windows-latest') }}
       name: Retry upload to codecov
       id: codecovupload2
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .

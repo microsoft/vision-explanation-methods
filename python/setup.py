@@ -37,10 +37,10 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'numpy>=1.26,<3',
+    'numpy<3',
     'tqdm',
     'matplotlib<3.7.0; python_version < "3.9"',
-    'matplotlib>=3.8.4; python_version >= "3.9"',
+    'matplotlib>=3.9; python_version >= "3.9"',
     'ml_wrappers>=0.6.0,<0.7'
 ]
 

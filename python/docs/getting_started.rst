@@ -8,9 +8,10 @@ To install the vision-explanation-methods package, you need to run the setup fil
 
 The dependencies required for the package are listed in the setup file. These include:
 
-- numpy
+- numpy<3 (including NumPy 1 and NumPy 2)
 - tqdm
-- matplotlib<3.7.0
+- matplotlib<3.7.0 on Python 3.7 and 3.8
+- matplotlib>=3.9 on Python 3.9 and later
 - ml_wrappers
 
 To install the package, navigate to the directory containing the setup file and run the following command:

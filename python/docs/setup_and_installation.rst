@@ -10,10 +10,10 @@ Installation
 
 The package can be installed using pip. The dependencies required for the package are:
 
-- numpy
+- numpy<3 (including NumPy 1 and NumPy 2)
 - tqdm
 - matplotlib<3.7.0 on Python 3.7 and 3.8
-- matplotlib>=3.8.4 on Python 3.9 and later
+- matplotlib>=3.9 on Python 3.9 and later
 - ml_wrappers
 
 You can install the package and its dependencies using the following command:
