@@ -50,6 +50,7 @@ jobs:
 
   ci-python:
     strategy:
+      fail-fast: false
       matrix:
         packageDirectory: ["vision_explanation_methods"]
         # disabling macos-latest for now as tests are failing
@@ -65,26 +66,12 @@ jobs:
       with:
         auto-update-conda: true
         python-version: ${{ matrix.pythonVersion }}
-    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion != '3.7' }}
-      name: Install pytorch on windows for python 3.8 and above
+    - name: Install compatible legacy PyTorch and Captum
       shell: bash -l {0}
       run: |
-        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly "libtiff<4.5.0" -c pytorch -c conda-forge
-    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion == '3.7' }}
-      name: Install pytorch on non-windows for python 3.7
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet "pytorch==1.13.1" torchvision captum cpuonly -c pytorch
-    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion == '3.7' }}
-      name: Install pytorch on windows for python 3.7
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet "pytorch::pytorch==1.13.1" pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
-    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion != '3.7' }}
-      name: Install pytorch on non-windows for python 3.8 and above
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
+        set -e
+        python -m pip install "torch==1.13.1+cpu" "torchvision==0.14.1+cpu" --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install "captum==0.6.0"
     - name: Install package
       shell: bash -l {0}
       run: |
@@ -96,7 +83,9 @@ jobs:
     - name: Test with pytest
       shell: bash -l {0}
       run: |
-        pytest ./tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
+        set -e
+        python -m pip check
+        pytest ./tests numpy_compatibility_tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
     - name: Upload code coverage results
       uses: actions/upload-artifact@v4
       with:

@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 import matplotlib
 import numpy as np
+import pytest
 import torch
 
 matplotlib.use('Agg')
@@ -26,6 +27,20 @@ def test_matplotlib_supports_numpy_1_and_2():
     figure, axes = plt.subplots()
     axes.plot(np.array([0.0, 1.0]), np.array([0.0, 1.0]))
     plt.close(figure)
+
+
+@pytest.mark.parametrize('num_detections', [0, 2])
+@pytest.mark.parametrize('missing_detections', [True, False])
+def test_empty_mask_preserves_detection_count(
+        num_detections, missing_detections):
+    """Keep one affinity score per target even when a mask detects nothing."""
+    base = SimpleNamespace(bounding_boxes=torch.zeros(num_detections, 4))
+    masked = None if missing_detections else SimpleNamespace(
+        bounding_boxes=torch.empty(0, 4))
+
+    scores = dr.drise.compute_affinity_scores(base, masked)
+
+    assert torch.equal(scores, torch.zeros(num_detections))
 
 
 def test_pointing_game_visualization_supports_numpy_1_and_2(tmp_path):
