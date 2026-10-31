@@ -70,8 +70,8 @@ jobs:
       shell: bash -l {0}
       run: |
         set -e
-        python -m pip install "torch==1.13.1+cpu" "torchvision==0.14.1+cpu" --index-url https://download.pytorch.org/whl/cpu
-        python -m pip install "captum==0.6.0"
+        python -m pip install --no-deps "torch==1.13.1+cpu" "torchvision==0.14.1+cpu" --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install torch torchvision "captum==0.6.0"
     - name: Install package
       shell: bash -l {0}
       run: |
