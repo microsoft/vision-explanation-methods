@@ -9,8 +9,48 @@ on:
     - cron:  '30 5 * * *'
 
 jobs:
+  ci-numpy-compatibility:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - numpyVersion: '1.23.5'
+            matplotlibSpec: 'matplotlib==3.9.0'
+            captumSpec: 'captum==0.5.0'
+          - numpyVersion: '1.26.4'
+            matplotlibSpec: 'matplotlib==3.9.0'
+          - numpyVersion: '2.0.2'
+            matplotlibSpec: 'matplotlib==3.9.0'
+          - numpyVersion: '2.2.6'
+            matplotlibSpec: 'matplotlib'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install package with NumPy ${{ matrix.numpyVersion }}
+      run: |
+        python -m pip install --upgrade pip
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        pip install "numpy==${{ matrix.numpyVersion }}" "${{ matrix.matplotlibSpec }}" "${{ matrix.captumSpec || 'captum' }}" -e ./python pytest requests
+
+    - name: Verify dependency consistency
+      run: |
+        python -c "import numpy; assert numpy.__version__ == '${{ matrix.numpyVersion }}'"
+        pip check
+
+    - name: Run NumPy compatibility test
+      run: |
+        python -m compileall -q python/vision_explanation_methods
+        pytest numpy_compatibility_tests -v
+
   ci-python:
     strategy:
+      fail-fast: false
       matrix:
         packageDirectory: ["vision_explanation_methods"]
         # disabling macos-latest for now as tests are failing
@@ -21,31 +61,17 @@ jobs:
     runs-on: ${{ matrix.operatingSystem }}
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         auto-update-conda: true
         python-version: ${{ matrix.pythonVersion }}
-    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion != '3.7' }}
-      name: Install pytorch on windows for python 3.8 and above
+    - name: Install compatible legacy PyTorch and Captum
       shell: bash -l {0}
       run: |
-        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly "libtiff<4.5.0" -c pytorch -c conda-forge
-    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion == '3.7' }}
-      name: Install pytorch on non-windows for python 3.7
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet "pytorch==1.13.1" torchvision captum cpuonly -c pytorch
-    - if: ${{ matrix.operatingSystem == 'windows-latest' && matrix.pythonVersion == '3.7' }}
-      name: Install pytorch on windows for python 3.7
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet "pytorch::pytorch==1.13.1" pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
-    - if: ${{ matrix.operatingSystem != 'windows-latest' && matrix.pythonVersion != '3.7' }}
-      name: Install pytorch on non-windows for python 3.8 and above
-      shell: bash -l {0}
-      run: |
-        conda install --yes --quiet pytorch::pytorch pytorch::torchvision pytorch::captum pytorch::cpuonly -c pytorch -c conda-forge
+        set -e
+        python -m pip install --no-deps "torch==1.13.1+cpu" "torchvision==0.14.1+cpu" --index-url https://download.pytorch.org/whl/cpu
+        python -m pip install torch torchvision "captum==0.6.0"
     - name: Install package
       shell: bash -l {0}
       run: |
@@ -57,18 +83,20 @@ jobs:
     - name: Test with pytest
       shell: bash -l {0}
       run: |
-        pytest ./tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
+        set -e
+        python -m pip check
+        pytest ./tests numpy_compatibility_tests -s -v --durations=10 --cov='vision_explanation_methods' --cov-report=xml --cov-report=html
     - name: Upload code coverage results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.packageDirectory }}-code-coverage-results
+        name: ${{ matrix.packageDirectory }}-${{ matrix.operatingSystem }}-py${{ matrix.pythonVersion }}-code-coverage-results
         path: htmlcov
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
     - if: ${{ (matrix.operatingSystem == 'windows-latest') && (matrix.pythonVersion == '3.8') }}
       name: Upload to codecov
       id: codecovupload1
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .
@@ -81,7 +109,7 @@ jobs:
     - if: ${{ (steps.codecovupload1.outcome == 'failure') && (matrix.pythonVersion == '3.8') && (matrix.operatingSystem == 'windows-latest') }}
       name: Retry upload to codecov
       id: codecovupload2
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         directory: .

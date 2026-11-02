@@ -15,9 +15,10 @@ Dependencies
 
 The vision-explanation-methods package requires the following dependencies:
 
-- numpy
+- numpy<3 (including NumPy 1 and NumPy 2)
 - tqdm
-- matplotlib<3.7.0
+- matplotlib<3.7.0 on Python 3.7 and 3.8
+- matplotlib>=3.9 on Python 3.9 and later
 - ml_wrappers
 
 Testing Dependencies

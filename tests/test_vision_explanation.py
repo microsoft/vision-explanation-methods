@@ -21,13 +21,13 @@ try:
     import torchvision
     from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 except ImportError:
-    module_logger.debug('Could not import torchvision packages, required' +
+    module_logger.debug('Could not import torchvision packages, required'
                         'if using a PyTorch computer vision model')
 
 try:
     import torch
 except ImportError:
-    module_logger.debug('Could not import torch, required if using a' +
+    module_logger.debug('Could not import torch, required if using a'
                         'PyTorch model')
 
 # execute tests from the root folder as follows:
@@ -89,9 +89,9 @@ def test_vision_explain_preloaded():
     # run the main function for saliency map generation
     # in the case of just a single item in photo
     res2 = dr.get_drise_saliency_map(image_location=imgpath2,
-                                    save_name=savepath,
-                                    model=None,
-                                    max_figures=2)
+                                     save_name=savepath2,
+                                     model=None,
+                                     max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert (len(res2) == 3)
@@ -181,11 +181,12 @@ def test_vision_explain_loadmodel(use_transforms):
 
     # run the main function for saliency map generation
     # in the case of just a single item in photo
-    res2 = dr.get_drise_saliency_map(image_location=imgpath2,
-                                    save_name=savepath2,
-                                    model=model,
-                                    num_classes=NUM_CLASSES,
-                                    max_figures=2)
+    res2 = dr.get_drise_saliency_map(
+        image_location=imgpath2,
+        save_name=savepath2,
+        model=model,
+        num_classes=NUM_CLASSES,
+        max_figures=2)
 
     # assert that result is a tuple of figure, location, and labels.
     assert (len(res2) == 3)

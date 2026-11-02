@@ -37,11 +37,11 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'numpy',
+    'numpy<3',
     'tqdm',
-    # TODO: remove this dependency
-    'matplotlib<3.7.0',
-    'ml_wrappers'
+    'matplotlib<3.7.0; python_version < "3.9"',
+    'matplotlib>=3.9; python_version >= "3.9"',
+    'ml_wrappers>=0.6.0,<0.7'
 ]
 
 with open(README_FILE, 'r', encoding='utf-8') as f:

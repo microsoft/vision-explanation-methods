@@ -126,17 +126,22 @@ def fuse_mask(
 
 def compute_affinity_scores(
     base_detections: DetectionRecord,
-    masked_detections: DetectionRecord
+    masked_detections: Optional[DetectionRecord]
 ) -> torch.Tensor:
     """Compute highest affinity score between two sets of detections.
 
     :param base_detections: Set of detections to get affinity scores for
     :type base_detections: Detection Record
     :param masked_detections: Set of detections to score against
-    :type masked_detections: Detection Record
+    :type masked_detections: Detection Record or None
     :return: Set of affinity scores associated with each detections
     :rtype: Tensor of shape D, where D is number of base detections
     """
+    if (masked_detections is None
+            or masked_detections.bounding_boxes.shape[0] == 0):
+        return torch.zeros(
+            base_detections.bounding_boxes.shape[0],
+            device=base_detections.bounding_boxes.device)
     score_matrix = compute_affinity_matrix(base_detections, masked_detections)
     return torch.max(score_matrix, dim=1)[0]
 
